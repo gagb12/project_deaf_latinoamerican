@@ -1,0 +1,1002 @@
+Deberías ver:
+
+text
+
+✅ CORS configurado para: ['http://localhost:3000']
+🔧 Modo DESARROLLO activado
+ * Running on http://0.0.0.0:5000
+6. Configurar Frontend
+Nueva terminal:
+
+Bash
+
+cd frontend
+
+# Instalar dependencias
+npm install
+
+# Copiar variables de entorno
+cp .env.example .env
+
+# Editar si es necesario
+nano .env
+7. Iniciar Frontend
+Bash
+
+npm start
+La aplicación se abrirá automáticamente en http://localhost:3000
+
+🐳 Instalación con Docker
+Usando Docker Compose (Recomendado)
+Bash
+
+# Desde la raíz del proyecto
+docker-compose up -d
+
+# Ver logs
+docker-compose logs -f
+
+# Detener
+docker-compose down
+Servicios disponibles:
+
+Frontend: http://localhost:3000
+Backend: http://localhost:5000
+PostgreSQL: localhost:5432
+Redis: localhost:6379
+Docker Manual
+Backend:
+
+Bash
+
+docker build -f Dockerfile.backend -t senas-backend .
+docker run -p 5000:5000 senas-backend
+Frontend:
+
+Bash
+
+docker build -f Dockerfile.frontend -t senas-frontend .
+docker run -p 3000:3000 senas-frontend
+📦 Descargar Modelos Pre-entrenados
+Bash
+
+# Crear directorio de modelos
+mkdir -p backend/models/trained_models
+
+# Opción 1: Descargar desde releases
+wget https://github.com/tuusuario/lenguaje-senas-app/releases/download/v1.0/lsc_model.h5 \
+  -O backend/models/trained_models/lsc_model.h5
+
+wget https://github.com/tuusuario/lenguaje-senas-app/releases/download/v1.0/asl_model.h5 \
+  -O backend/models/trained_models/asl_model.h5
+
+# Opción 2: Entrenar tus propios modelos
+cd ml_training
+python train_model.py
+✅ Verificar Instalación
+1. Verificar Backend
+Bash
+
+curl http://localhost:5000/api/health
+Respuesta esperada:
+
+JSON
+
+{
+  "status": "healthy",
+  "version": "1.0.0",
+  "models": {
+    "LSC": "loaded",
+    "ASL": "loaded"
+  }
+}
+2. Verificar Frontend
+Abre http://localhost:3000 en tu navegador. Deberías ver la interfaz principal.
+
+3. Verificar Cámara
+Haz clic en "Iniciar Cámara"
+Permite acceso a la cámara
+Realiza una seña
+Verifica que aparezcan subtítulos
+🔍 Solución de Problemas Comunes
+Error: "ModuleNotFoundError: No module named 'cv2'"
+Bash
+
+pip install opencv-python
+Error: "Permission denied" en cámara
+Chrome: Ir a chrome://settings/content/camera y permitir acceso
+Firefox: Ir a about:preferences#privacy y permitir cámara
+Error: Puerto 5000 ya en uso
+Bash
+
+# Cambiar puerto en .env
+PORT=5001
+
+# O matar proceso
+# Linux/Mac:
+lsof -ti:5000 | xargs kill -9
+# Windows:
+netstat -ano | findstr :5000
+taskkill /PID <PID> /F
+Error: "CORS policy" en navegador
+Verifica que CORS_ORIGINS en .env incluya la URL del frontend:
+
+Bash
+
+CORS_ORIGINS=http://localhost:3000,http://127.0.0.1:3000
+Modelos no se cargan
+Bash
+
+# Verificar que existan los archivos
+ls -la backend/models/trained_models/
+
+# Si no existen, descargarlos o entrenarlos
+cd ml_training
+python train_model.py
+🧪 Ejecutar Tests
+Backend Tests
+Bash
+
+cd backend
+pytest
+# O con cobertura
+pytest --cov=./ --cov-report=html
+Frontend Tests
+Bash
+
+cd frontend
+npm test
+# Cobertura
+npm test -- --coverage
+📱 Instalación en Dispositivos Móviles
+La aplicación es una PWA y puede instalarse:
+
+Abre la app en el navegador móvil
+Chrome: Menú → "Agregar a pantalla de inicio"
+Safari: Compartir → "Agregar a pantalla de inicio"
+🔄 Actualizar Proyecto
+Bash
+
+# Actualizar código
+git pull origin main
+
+# Actualizar dependencias backend
+cd backend
+pip install -r requirements.txt --upgrade
+
+# Actualizar dependencias frontend
+cd frontend
+npm install
+🗑️ Desinstalación
+Bash
+
+# Detener servicios Docker
+docker-compose down -v
+
+# Eliminar entorno virtual
+deactivate
+rm -rf venv
+
+# Eliminar node_modules
+rm -rf frontend/node_modules
+
+# Eliminar archivos generados
+rm -rf logs data uploads backend/models/trained_models/*.h5
+📚 Siguientes Pasos
+Lee la Guía de Usuario para aprender a usar la aplicación
+Consulta la Guía del Desarrollador para empezar a contribuir
+Revisa la Documentación de API para integrar con otros sistemas
+💬 ¿Necesitas Ayuda?
+FAQ - Preguntas frecuentes
+Troubleshooting - Solución de problemas
+GitHub Issues - Reportar bugs
+✅ Instalación completada! Ahora puedes empezar a usar el traductor de lengua de señas.
+
+text
+
+
+---
+
+## 3. **docs/API_DOCUMENTATION.md**
+
+```markdown
+# 📡 Documentación de API
+
+Documentación completa de los endpoints REST y WebSocket del backend.
+
+## 🌐 Base URL
+
+- **Desarrollo:** `http://localhost:5000`
+- **Producción:** `https://api.tudominio.com`
+
+## 🔑 Autenticación
+
+Actualmente la API no requiere autenticación. En producción se recomienda implementar:
+- API Keys
+- JWT Tokens
+- OAuth 2.0
+
+## 📍 REST Endpoints
+
+### Health Check
+
+Verifica el estado del servidor y modelos.
+
+**Endpoint:** `GET /api/health`
+
+**Respuesta:**
+```json
+{
+  "status": "healthy",
+  "version": "1.0.0",
+  "timestamp": "2024-01-15T10:30:00Z",
+  "models": {
+    "LSC": "loaded",
+    "ASL": "loaded"
+  },
+  "uptime": 3600
+}
+Códigos de Estado:
+
+200 - Servidor funcionando correctamente
+503 - Servidor no disponible
+Obtener Modelos Disponibles
+Lista los modelos de ML disponibles.
+
+Endpoint: GET /api/models
+
+Respuesta:
+
+JSON
+
+{
+  "models": [
+    {
+      "language": "LSC",
+      "name": "Lengua de Señas Colombiana",
+      "version": "1.0.0",
+      "classes": 30,
+      "accuracy": 0.92
+    },
+    {
+      "language": "ASL",
+      "name": "American Sign Language",
+      "version": "1.0.0",
+      "classes": 26,
+      "accuracy": 0.95
+    }
+  ]
+}
+Predicción Estática
+Realiza predicción sobre una imagen estática.
+
+Endpoint: POST /api/predict
+
+Headers:
+
+text
+
+Content-Type: application/json
+Body:
+
+JSON
+
+{
+  "image": "base64_encoded_image_data",
+  "language": "LSC"
+}
+Respuesta:
+
+JSON
+
+{
+  "success": true,
+  "prediction": {
+    "text": "Hola",
+    "confidence": 0.89,
+    "class_id": 0,
+    "language": "LSC"
+  },
+  "timestamp": "2024-01-15T10:30:00Z",
+  "processing_time": 0.234
+}
+Errores:
+
+JSON
+
+{
+  "success": false,
+  "error": {
+    "code": 1001,
+    "message": "No se detectaron manos en la imagen"
+  }
+}
+Códigos de Estado:
+
+200 - Predicción exitosa
+400 - Datos inválidos
+422 - Error procesando imagen
+500 - Error del servidor
+Historial de Traducciones
+Obtiene el historial de traducciones.
+
+Endpoint: GET /api/history
+
+Parámetros Query:
+
+limit (opcional): Número de resultados (default: 50, max: 100)
+offset (opcional): Offset para paginación (default: 0)
+language (opcional): Filtrar por idioma (LSC/ASL)
+session_id (opcional): Filtrar por sesión
+Ejemplo:
+
+text
+
+GET /api/history?limit=10&language=LSC
+Respuesta:
+
+JSON
+
+{
+  "total": 125,
+  "limit": 10,
+  "offset": 0,
+  "results": [
+    {
+      "id": 1,
+      "text": "Hola",
+      "language": "LSC",
+      "confidence": 0.92,
+      "timestamp": "2024-01-15T10:30:00Z",
+      "session_id": "abc123"
+    }
+  ]
+}
+Estadísticas
+Obtiene estadísticas de uso.
+
+Endpoint: GET /api/stats
+
+Respuesta:
+
+JSON
+
+{
+  "total_predictions": 1523,
+  "predictions_by_language": {
+    "LSC": 892,
+    "ASL": 631
+  },
+  "average_confidence": 0.87,
+  "most_common_signs": [
+    {"text": "Hola", "count": 45},
+    {"text": "Gracias", "count": 38}
+  ],
+  "predictions_last_24h": 156,
+  "active_users": 12
+}
+🔌 WebSocket Events
+Conexión
+URL: ws://localhost:5000/socket.io/
+
+Cliente (JavaScript):
+
+JavaScript
+
+import io from 'socket.io-client';
+
+const socket = io('http://localhost:5000', {
+  transports: ['websocket'],
+  reconnection: true
+});
+Eventos del Cliente → Servidor
+connect
+Emitido automáticamente al conectar.
+
+Respuesta del servidor:
+
+JavaScript
+
+socket.on('response', (data) => {
+  console.log(data); // { message: 'Conectado al servidor' }
+});
+video_frame
+Envía un frame de video para procesamiento.
+
+Datos a enviar:
+
+JavaScript
+
+socket.emit('video_frame', {
+  image: base64ImageData,
+  language: 'LSC', // o 'ASL'
+  timestamp: Date.now()
+});
+Tipo de datos:
+
+TypeScript
+
+{
+  image: string;      // Imagen en base64
+  language: 'LSC' | 'ASL';
+  timestamp?: number;
+}
+language_change
+Cambia el idioma de detección.
+
+Datos a enviar:
+
+JavaScript
+
+socket.emit('language_change', {
+  language: 'ASL'
+});
+Eventos del Servidor → Cliente
+prediction
+Recibe una predicción procesada.
+
+Datos recibidos:
+
+JavaScript
+
+socket.on('prediction', (data) => {
+  console.log(data);
+});
+Estructura:
+
+TypeScript
+
+{
+  text: string;           // Texto predicho
+  confidence: number;     // Confianza (0-1)
+  language: 'LSC' | 'ASL';
+  class_id: number;
+  timestamp: string;
+}
+Ejemplo:
+
+JavaScript
+
+{
+  "text": "Gracias",
+  "confidence": 0.91,
+  "language": "LSC",
+  "class_id": 1,
+  "timestamp": "2024-01-15T10:30:00Z"
+}
+error
+Recibe notificación de error.
+
+Datos recibidos:
+
+JavaScript
+
+socket.on('error', (data) => {
+  console.error(data);
+});
+Estructura:
+
+TypeScript
+
+{
+  code: number;
+  message: string;
+  details?: any;
+}
+Códigos de error:
+
+1001 - No se detectaron manos
+1002 - Confianza muy baja
+1003 - Modelo no cargado
+1004 - Idioma inválido
+1005 - Error de procesamiento
+1006 - Error de cámara
+status
+Actualización de estado del servidor.
+
+Datos recibidos:
+
+JavaScript
+
+socket.on('status', (data) => {
+  console.log(data);
+});
+Ejemplo:
+
+JavaScript
+
+{
+  "status": "processing",
+  "queue_size": 3,
+  "fps": 10
+}
+disconnect
+Emitido al desconectar.
+
+JavaScript
+
+socket.on('disconnect', (reason) => {
+  console.log('Desconectado:', reason);
+});
+💡 Ejemplos de Uso
+Ejemplo Frontend Completo
+JavaScript
+
+import { useEffect, useState } from 'react';
+import io from 'socket.io-client';
+
+function App() {
+  const [socket, setSocket] = useState(null);
+  const [prediction, setPrediction] = useState('');
+
+  useEffect(() => {
+    // Conectar al servidor
+    const newSocket = io('http://localhost:5000');
+    
+    // Escuchar predicciones
+    newSocket.on('prediction', (data) => {
+      setPrediction(data.text);
+      console.log('Confianza:', data.confidence);
+    });
+    
+    // Manejar errores
+    newSocket.on('error', (error) => {
+      console.error('Error:', error.message);
+    });
+    
+    setSocket(newSocket);
+    
+    return () => newSocket.close();
+  }, []);
+
+  const sendFrame = (imageData) => {
+    if (socket) {
+      socket.emit('video_frame', {
+        image: imageData,
+        language: 'LSC'
+      });
+    }
+  };
+
+  return (
+    <div>
+      <h1>Predicción: {prediction}</h1>
+      {/* Tu componente de cámara aquí */}
+    </div>
+  );
+}
+Ejemplo Backend Python
+Python
+
+from flask import Flask
+from flask_socketio import SocketIO, emit
+
+app = Flask(__name__)
+socketio = SocketIO(app, cors_allowed_origins="*")
+
+@socketio.on('video_frame')
+def handle_frame(data):
+    image = data.get('image')
+    language = data.get('language', 'LSC')
+    
+    # Procesar imagen
+    prediction = process_image(image, language)
+    
+    # Enviar predicción
+    emit('prediction', {
+        'text': prediction['text'],
+        'confidence': prediction['confidence'],
+        'language': language
+    })
+
+if __name__ == '__main__':
+    socketio.run(app, port=5000)
+Ejemplo con cURL
+Bash
+
+# Health check
+curl http://localhost:5000/api/health
+
+# Predicción
+curl -X POST http://localhost:5000/api/predict \
+  -H "Content-Type: application/json" \
+  -d '{
+    "image": "iVBORw0KGgoAAAANSUhEUg...",
+    "language": "LSC"
+  }'
+
+# Historial
+curl http://localhost:5000/api/history?limit=5&language=LSC
+📊 Rate Limiting
+Límites actuales:
+
+API REST: 100 requests/hora por IP
+WebSocket: 10 frames/segundo por conexión
+Headers de respuesta:
+
+text
+
+X-RateLimit-Limit: 100
+X-RateLimit-Remaining: 95
+X-RateLimit-Reset: 1642248000
+Error cuando se excede:
+
+JSON
+
+{
+  "error": {
+    "code": 429,
+    "message": "Rate limit exceeded. Try again in 60 seconds."
+  }
+}
+🔒 Seguridad
+Mejores Prácticas
+Usar HTTPS en producción
+Implementar autenticación
+Validar inputs
+Sanitizar datos
+Rate limiting
+CORS configurado correctamente
+Headers de Seguridad
+text
+
+X-Content-Type-Options: nosniff
+X-Frame-Options: SAMEORIGIN
+X-XSS-Protection: 1; mode=block
+📝 Notas Adicionales
+Todos los timestamps están en formato ISO 8601 UTC
+Las imágenes deben estar en formato base64
+El tamaño máximo de payload es 10MB
+Las conexiones WebSocket se cierran automáticamente después de 5 minutos de inactividad
+🆘 Soporte
+¿Problemas con la API?
+
+Reportar un bug
+Email: api-support@tudominio.com
+text
+
+
+---
+
+## 4. **docs/USER_GUIDE.md**
+
+```markdown
+# 📱 Guía de Usuario
+
+Guía completa para usar el Traductor de Lengua de Señas.
+
+## 🎯 Introducción
+
+Esta aplicación traduce lenguaje de señas a texto en tiempo real usando tu cámara web y tecnología de inteligencia artificial.
+
+**Idiomas soportados:**
+- 🇨🇴 **LSC** - Lengua de Señas Colombiana
+- 🌍 **ASL** - American Sign Language (Internacional)
+
+## 🚀 Inicio Rápido
+
+### 1. Acceder a la Aplicación
+
+Abre tu navegador y visita:
+- Local: `http://localhost:3000`
+- Producción: `https://tudominio.com`
+
+### 2. Permitir Acceso a la Cámara
+
+Al hacer clic en "Iniciar Cámara", el navegador pedirá permiso:
+
+**Chrome:**
+1. Click en "Permitir" en el popup
+2. Si no aparece: Configuración → Privacidad → Permisos de sitios → Cámara
+
+**Firefox:**
+1. Click en "Permitir" 
+2. Si no aparece: Preferencias → Privacidad → Permisos → Cámara
+
+**Safari:**
+1. Click en "Permitir"
+2. Configuración → Sitios web → Cámara
+
+### 3. Seleccionar Idioma
+
+Haz clic en el idioma que deseas usar:
+- **LSC** - Para lengua de señas colombiana
+- **ASL** - Para lengua de señas americana/internacional
+
+### 4. Realizar Señas
+
+1. Posiciónate frente a la cámara
+2. Asegúrate de tener buena iluminación
+3. Mantén tus manos visibles
+4. Realiza las señas claramente
+5. Los subtítulos aparecerán automáticamente
+
+## 📖 Características Principales
+
+### 🎥 Vista de Cámara
+
+La cámara muestra:
+- Video en tiempo real
+- Detección de manos (líneas verdes)
+- Indicador de grabación (punto rojo)
+- FPS (frames por segundo)
+
+### 📝 Subtítulos
+
+Los subtítulos muestran:
+- **Texto traducido** en grande
+- **Nivel de confianza** (barra de color)
+  - Verde: Alta confianza (>80%)
+  - Naranja: Media confianza (60-80%)
+  - Rojo: Baja confianza (<60%)
+- **Idioma actual** (LSC o ASL)
+
+### 📊 Barra de Confianza
+
+Indica qué tan seguro está el sistema de la traducción:
+- **Verde (80-100%)**: Traducción muy confiable
+- **Naranja (60-80%)**: Traducción probable
+- **Rojo (0-60%)**: Poca confianza, intenta de nuevo
+
+### 📜 Historial de Traducciones
+
+Puedes ver todas las traducciones recientes:
+1. Click en "Ver Historial"
+2. Se muestra lista de traducciones con:
+   - Texto traducido
+   - Hora
+   - Nivel de confianza
+3. Click en "Limpiar Historial" para borrar
+
+## 🎨 Interfaz de Usuario
+
+### Pantalla Principal
+┌─────────────────────────────────────────┐
+│ 🤟 Traductor de Lengua de Señas │
+│ Colombiana (LSC) e Internacional │
+└─────────────────────────────────────────┘
+┌─────────────────────────────────────────┐
+│ [ 🇨🇴 LSC ] [ 🌍 ASL ] │
+└─────────────────────────────────────────┘
+┌─────────────────────────────────────────┐
+│ │
+│ 📹 VISTA DE CÁMARA │
+│ │
+│ (Tu video aquí) │
+│ │
+└─────────────────────────────────────────┘
+[ 📹 Iniciar Cámara ]
+┌─────────────────────────────────────────┐
+│ 🇨🇴 LSC │
+│ │
+│ "Hola" │
+│ │
+│ ████████████░░░░░ 85% confianza │
+└─────────────────────────────────────────┘
+
+text
+
+
+### Controles
+
+- **📹 Iniciar Cámara**: Activa la detección
+- **⏹️ Detener**: Para la detección
+- **🇨🇴 LSC / 🌍 ASL**: Cambia idioma
+- **📜 Historial**: Ver traducciones previas
+- **🗑️ Limpiar**: Borrar historial
+
+## 💡 Consejos para Mejores Resultados
+
+### ✅ Hacer
+
+1. **Iluminación adecuada**
+   - Luz frontal o lateral
+   - Evita contraluz
+   - Iluminación uniforme
+
+2. **Posición correcta**
+   - Manos visibles completamente
+   - Distancia: 50cm - 1m de la cámara
+   - Fondo uniforme preferiblemente
+
+3. **Señas claras**
+   - Movimientos deliberados
+   - Mantén las señas por 1-2 segundos
+   - Pausas entre señas
+
+4. **Ropa adecuada**
+   - Contraste con fondo
+   - Mangas que no tapen las manos
+
+### ❌ Evitar
+
+1. **Iluminación deficiente**
+   - Sombras fuertes
+   - Luz directa detrás
+   - Poca luz
+
+2. **Posición incorrecta**
+   - Manos fuera de cuadro
+   - Muy cerca o lejos
+   - Ángulo oblicuo
+
+3. **Señas rápidas**
+   - Movimientos bruscos
+   - Cambios muy rápidos
+   - Señas incompletas
+
+4. **Distracciones**
+   - Fondo con movimiento
+   - Otras personas en cuadro
+   - Objetos en las manos
+
+## 📚 Señas Soportadas
+
+### LSC (Lengua de Señas Colombiana)
+
+**Palabras comunes:**
+- Hola
+- Gracias
+- Por favor
+- Sí / No
+- Ayuda
+- Familia
+- Amor
+- Casa
+- Trabajo
+- Estudiar
+- (y más...)
+
+### ASL (American Sign Language)
+
+**Alfabeto completo:**
+A - Z (26 letras)
+
+**Palabras comunes:**
+- Hello
+- Thank you
+- Please
+- Yes / No
+- Help
+- Family
+- Love
+- Home
+- Work
+- Study
+- (y más...)
+
+## 🔧 Solución de Problemas Comunes
+
+### La cámara no funciona
+
+**Problema:** No se activa la cámara
+
+**Soluciones:**
+1. Verifica permisos del navegador
+2. Cierra otras apps que usan la cámara
+3. Prueba otro navegador
+4. Reinicia el navegador
+5. Verifica que la cámara funcione en otras apps
+
+### No aparecen subtítulos
+
+**Problema:** La cámara funciona pero no hay traducción
+
+**Soluciones:**
+1. Verifica que tus manos estén visibles
+2. Mejora la iluminación
+3. Realiza señas más despacio
+4. Verifica conexión a internet
+5. Recarga la página
+
+### Subtítulos incorrectos
+
+**Problema:** La traducción no coincide con la seña
+
+**Soluciones:**
+1. Realiza la seña más claramente
+2. Mantén la seña por más tiempo
+3. Verifica que estés en el idioma correcto (LSC/ASL)
+4. Consulta guía de señas
+5. Mejora iluminación y posición
+
+### Confianza muy baja
+
+**Problema:** Barra de confianza siempre en rojo
+
+**Soluciones:**
+1. Mejora iluminación
+2. Acércate o aléjate de la cámara
+3. Usa fondo más uniforme
+4. Realiza señas más despacio
+5. Verifica que la seña sea correcta
+
+## 📱 Usar en Móvil
+
+### Instalación como App (PWA)
+
+**Android (Chrome):**
+1. Abre la app en Chrome
+2. Menú (⋮) → "Agregar a pantalla de inicio"
+3. Confirma instalación
+4. Ícono aparecerá en tu pantalla
+
+**iOS (Safari):**
+1. Abre la app en Safari
+2. Tap en "Compartir" (cuadro con flecha)
+3. "Agregar a pantalla de inicio"
+4. Tap "Agregar"
+
+### Consejos Móvil
+
+- Usa en horizontal para mejor experiencia
+- Apoya el teléfono en un soporte
+- Asegura buena iluminación
+- Usa WiFi para mejor conexión
+
+## 🎓 Aprender Lengua de Señas
+
+### Recursos Recomendados
+
+**LSC (Lengua de Señas Colombiana):**
+- [INSOR Colombia](https://www.insor.gov.co)
+- Diccionario LSC
+- Videos tutoriales YouTube
+
+**ASL (American Sign Language):**
+- [Lifeprint ASL](https://www.lifeprint.com)
+- [SignASL.org](https://www.signasl.org)
+- App "The ASL App"
+
+### Comunidades
+
+- Facebook: Grupos de LSC/ASL
+- Discord: Comunidades sordas
+- Instagram: Cuentas educativas
+- YouTube: Canales de enseñanza
+
+## 📊 Privacidad y Datos
+
+### ¿Qué se guarda?
+
+- ✅ Historial local de traducciones (en tu navegador)
+- ✅ Estadísticas anónimas de uso
+- ❌ NO se graban videos
+- ❌ NO se guardan imágenes
+- ❌ NO se comparten datos personales
+
+### Borrar Datos
+
+1. Historial: Click en "Limpiar Historial"
+2. Caché del navegador:
+   - Chrome: Ctrl+Shift+Del → Borrar datos
+   - Firefox: Ctrl+Shift+Del → Limpiar historial
+
+## 🆘 Obtener Ayuda
+
+### Soporte Técnico
+
+- 📧 Email: soporte@tudominio.com
+- 💬 Chat en vivo (esquina inferior derecha)
+- 📱 WhatsApp: +57 300 123 4567
+- 🐛 Reportar bug: [GitHub Issues](https://github.com/tuusuario/lenguaje-senas-app/issues)
+
+### Preguntas Frecuentes
+
+Consulta nuestro [FAQ](FAQ.md) para respuestas rápidas.
+
+### Comunidad
+
+- Discord: [Unirse al servidor](#)
+- Facebook: [Grupo de usuarios](#)
+- Twitter: [@TuApp](#)
+
+## 🎉 ¡Disfruta la App!
+
+Gracias por usar nuestro Traductor de Lengua de Señas. 
+
+**Recuerda:** Esta herramienta es un apoyo, no reemplaza el aprendizaje completo de lengua de señas.
+
+---
+
+Desarrollado con ❤️ para hacer el mundo más accesible

@@ -1,0 +1,28 @@
+
+---
+
+## 🚀 Instrucciones de Instalación
+
+```bash
+# 1. Crear estructura de carpetas
+mkdir lenguaje-senas-app
+cd lenguaje-senas-app
+
+# 2. Clonar estructura
+# (copiar todos los archivos según la estructura)
+
+# 3. Instalar Backend
+cd backend
+pip install -r requirements.txt
+
+# 4. Instalar Frontend
+cd ../frontend
+npm install
+
+# 5. Iniciar Backend
+cd ../backend
+python server.py
+
+# 6. Iniciar Frontend (nueva terminal)
+cd frontend
+npm start

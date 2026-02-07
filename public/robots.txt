@@ -1,0 +1,25 @@
+# https://www.robotstxt.org/robotstxt.html
+User-agent: *
+Allow: /
+
+# Sitemap (si tienes uno)
+Sitemap: https://tudominio.com/sitemap.xml
+
+# Bloquear archivos privados
+Disallow: /admin/
+Disallow: /api/
+Disallow: /*.json$
+
+# Permitir motores de búsqueda principales
+User-agent: Googlebot
+Allow: /
+
+User-agent: Bingbot
+Allow: /
+
+# Rastreo de imágenes
+User-agent: Googlebot-Image
+Allow: /images/
+
+# Tiempo de rastreo (opcional)
+Crawl-delay: 10

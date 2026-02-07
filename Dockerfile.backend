@@ -1,0 +1,39 @@
+# Dockerfile para Backend Flask
+FROM python:3.9-slim
+
+# Variables de entorno
+ENV PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PIP_NO_CACHE_DIR=1
+
+# Directorio de trabajo
+WORKDIR /app
+
+# Instalar dependencias del sistema
+RUN apt-get update && apt-get install -y \
+    libglib2.0-0 \
+    libsm6 \
+    libxext6 \
+    libxrender-dev \
+    libgomp1 \
+    libgl1-mesa-glx \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copiar requirements
+COPY backend/requirements.txt .
+
+# Instalar dependencias Python
+RUN pip install --upgrade pip && \
+    pip install -r requirements.txt
+
+# Copiar código
+COPY backend/ .
+
+# Crear directorios necesarios
+RUN mkdir -p logs data models/trained_models
+
+# Exponer puerto
+EXPOSE 5000
+
+# Comando de inicio
+CMD ["python", "server.py"]

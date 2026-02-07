@@ -1,0 +1,55 @@
+const sharp = require('sharp');
+const fs = require('fs');
+const path = require('path');
+
+// Asegúrate de tener una imagen base logo.png en public/
+const inputFile = path.join(__dirname, 'public', 'logo.png');
+const outputDir = path.join(__dirname, 'public', 'icons');
+
+// Crear directorio si no existe
+if (!fs.existsSync(outputDir)) {
+  fs.mkdirSync(outputDir, { recursive: true });
+}
+
+const sizes = [72, 96, 128, 144, 152, 192, 384, 512];
+
+async function generateIcons() {
+  for (const size of sizes) {
+    try {
+      await sharp(inputFile)
+        .resize(size, size)
+        .toFile(path.join(outputDir, `icon-${size}x${size}.png`));
+      
+      console.log(`✅ Generado: icon-${size}x${size}.png`);
+    } catch (error) {
+      console.error(`❌ Error generando icono ${size}x${size}:`, error);
+    }
+  }
+  
+  // Generar favicon
+  try {
+    await sharp(inputFile)
+      .resize(32, 32)
+      .toFile(path.join(__dirname, 'public', 'favicon.ico'));
+    console.log('✅ Generado: favicon.ico');
+  } catch (error) {
+    console.error('❌ Error generando favicon:', error);
+  }
+  
+  // Generar logos principales
+  try {
+    await sharp(inputFile)
+      .resize(192, 192)
+      .toFile(path.join(__dirname, 'public', 'logo192.png'));
+    
+    await sharp(inputFile)
+      .resize(512, 512)
+      .toFile(path.join(__dirname, 'public', 'logo512.png'));
+    
+    console.log('✅ Generados: logo192.png y logo512.png');
+  } catch (error) {
+    console.error('❌ Error generando logos:', error);
+  }
+}
+
+generateIcons();

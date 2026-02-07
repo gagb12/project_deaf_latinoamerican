@@ -1,0 +1,98 @@
+{
+  "language": "LSC",
+  "name": "Lengua de Señas Colombiana",
+  "country": "Colombia",
+  "version": "1.0",
+  "categories": {
+    "saludos": [
+      "hola", "adios", "buenos_dias", "buenas_tardes",
+      "buenas_noches", "como_estas", "bien", "mal",
+      "mas_o_menos", "mucho_gusto"
+    ],
+    "cortesia": [
+      "por_favor", "gracias", "de_nada", "perdon",
+      "disculpa", "permiso"
+    ],
+    "pronombres": [
+      "yo", "tu", "el", "ella", "nosotros",
+      "ustedes", "ellos"
+    ],
+    "familia": [
+      "mama", "papa", "hermano", "hermana",
+      "hijo", "hija", "abuelo", "abuela",
+      "tio", "tia", "primo", "familia"
+    ],
+    "preguntas": [
+      "que", "como", "donde", "cuando", "porque",
+      "quien", "cuanto", "cual"
+    ],
+    "verbos": [
+      "querer", "poder", "necesitar", "tener",
+      "ir", "venir", "comer", "beber",
+      "dormir", "trabajar", "estudiar", "jugar",
+      "hablar", "entender", "saber", "gustar",
+      "ayudar", "esperar", "buscar", "encontrar"
+    ],
+    "comida": [
+      "agua", "comida", "pan", "leche",
+      "arroz", "carne", "fruta", "verdura",
+      "cafe", "jugo", "desayuno", "almuerzo", "cena"
+    ],
+    "lugares": [
+      "casa", "escuela", "hospital", "tienda",
+      "iglesia", "parque", "trabajo", "banco",
+      "restaurante", "calle"
+    ],
+    "tiempo": [
+      "hoy", "ayer", "manana", "ahora",
+      "despues", "antes", "semana", "mes",
+      "ano", "hora", "minuto"
+    ],
+    "numeros": [
+      "uno", "dos", "tres", "cuatro", "cinco",
+      "seis", "siete", "ocho", "nueve", "diez",
+      "cien", "mil"
+    ],
+    "colores": [
+      "rojo", "azul", "verde", "amarillo",
+      "blanco", "negro", "naranja", "morado"
+    ],
+    "adjetivos": [
+      "grande", "pequeno", "bonito", "feo",
+      "bueno", "malo", "nuevo", "viejo",
+      "rapido", "lento", "facil", "dificil",
+      "caliente", "frio", "contento", "triste"
+    ],
+    "emergencia": [
+      "emergencia", "ayuda", "policia", "bomberos",
+      "ambulancia", "peligro", "dolor", "enfermo",
+      "accidente", "fuego"
+    ],
+    "alfabeto": [
+      "A", "B", "C", "D", "E", "F", "G", "H", "I",
+      "J", "K", "L", "M", "N", "O", "P", "Q", "R",
+      "S", "T", "U", "V", "W", "X", "Y", "Z"
+    ]
+  },
+  "words": [
+    "hola", "adios", "buenos_dias", "buenas_tardes",
+    "buenas_noches", "como_estas", "bien", "mal",
+    "mas_o_menos", "mucho_gusto", "por_favor", "gracias",
+    "de_nada", "perdon", "disculpa", "permiso",
+    "yo", "tu", "el", "ella", "nosotros", "ustedes", "ellos",
+    "mama", "papa", "hermano", "hermana", "hijo", "hija",
+    "abuelo", "abuela", "tio", "tia", "primo", "familia",
+    "que", "como", "donde", "cuando", "porque", "quien",
+    "querer", "poder", "necesitar", "tener", "ir", "venir",
+    "comer", "beber", "dormir", "trabajar", "estudiar",
+    "hablar", "entender", "saber", "gustar", "ayudar",
+    "agua", "comida", "pan", "leche", "arroz", "carne",
+    "casa", "escuela", "hospital", "tienda", "trabajo",
+    "hoy", "ayer", "manana", "ahora", "despues",
+    "uno", "dos", "tres", "cuatro", "cinco",
+    "rojo", "azul", "verde", "amarillo", "blanco", "negro",
+    "grande", "pequeno", "bueno", "malo", "rapido", "lento",
+    "emergencia", "ayuda", "policia", "dolor", "enfermo"
+  ],
+  "total_words": 95
+}

@@ -1,0 +1,32 @@
+
+---
+
+## 2. **docs/INSTALLATION.md**
+
+```markdown
+# 🚀 Guía de Instalación
+
+Guía completa para instalar y configurar el proyecto en tu máquina local.
+
+## 📋 Requisitos Previos
+
+### Software Necesario
+
+- **Python** 3.8 o superior
+- **Node.js** 16 o superior
+- **npm** o **yarn**
+- **Git**
+- **Webcam** (para usar la funcionalidad de detección)
+
+### Opcional
+- **Docker** y **Docker Compose** (para instalación con contenedores)
+- **PostgreSQL** (si usas base de datos en lugar de SQLite)
+- **Redis** (para rate limiting y caché)
+
+## 🔧 Instalación Local
+
+### 1. Clonar el Repositorio
+
+```bash
+git clone https://github.com/tuusuario/lenguaje-senas-app.git
+cd lenguaje-senas-app

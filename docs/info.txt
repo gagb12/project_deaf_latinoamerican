@@ -1,0 +1,38 @@
+🌟 Características Principales
+✅ Detección en tiempo real de señas
+✅ Soporte para LSC (Lengua de Señas Colombiana)
+✅ Soporte para ASL (American Sign Language)
+✅ Interfaz web intuitiva
+✅ Subtítulos con nivel de confianza
+✅ PWA instalable
+✅ Funcionalidad offline (próximamente)
+📊 Estado del Proyecto
+Build Status
+Coverage
+Version
+License
+
+🛠️ Stack Tecnológico
+Backend:
+
+Python 3.9+
+Flask + Flask-SocketIO
+TensorFlow / Keras
+MediaPipe
+OpenCV
+Frontend:
+
+React 18
+Socket.IO Client
+CSS3 / Styled Components
+Machine Learning:
+
+TensorFlow
+MediaPipe Hands
+Custom CNN/LSTM Models
+📞 Soporte
+📧 Email: soporte@tudominio.com
+💬 Discord: Servidor de la comunidad
+🐛 Issues: GitHub Issues
+📄 Licencia
+Este proyecto está bajo la licencia MIT. Ver LICENSE.md para más detalles.

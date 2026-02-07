@@ -1,0 +1,2 @@
+# Desde la raíz del proyecto
+mkdir -p logs data backend/models/trained_models uploads

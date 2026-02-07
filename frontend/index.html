@@ -1,0 +1,2608 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="SignAI - Inteligencia Artificial para personas sordas">
+    <title>🤟 SignAI - IA para Personas Sordas</title>
+
+    <!-- ============================================ -->
+    <!-- FUENTES Y LIBRERÍAS EXTERNAS                 -->
+    <!-- ============================================ -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+
+    <!-- Three.js para Avatar 3D -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+    <!-- MediaPipe para detección de manos -->
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js" crossorigin="anonymous"></script>
+
+    <!-- ============================================ -->
+    <!-- CSS PRINCIPAL EMBEBIDO                       -->
+    <!-- ============================================ -->
+    <style>
+        /* ============================
+           VARIABLES CSS (TEMAS)
+           ============================ */
+        :root {
+            --bg-primary: #0a0a1a;
+            --bg-secondary: #12122e;
+            --bg-tertiary: #1a1a3e;
+            --bg-card: #1e1e4a;
+            --text-primary: #ffffff;
+            --text-secondary: #b0b0d0;
+            --text-muted: #6a6a9a;
+            --accent-primary: #667eea;
+            --accent-secondary: #764ba2;
+            --accent-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --success: #2ecc71;
+            --warning: #f39c12;
+            --danger: #e74c3c;
+            --info: #3498db;
+            --border-color: #2a2a5a;
+            --shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
+            --radius: 16px;
+            --radius-sm: 8px;
+            --transition: all 0.3s ease;
+            --font-size-base: 18px;
+        }
+
+        [data-theme="high-contrast"] {
+            --bg-primary: #000000;
+            --bg-secondary: #0a0a0a;
+            --bg-tertiary: #1a1a1a;
+            --bg-card: #222222;
+            --text-primary: #ffffff;
+            --text-secondary: #e0e0e0;
+            --accent-primary: #00ff88;
+            --accent-secondary: #00ccff;
+            --border-color: #ffffff;
+        }
+
+        [data-theme="light"] {
+            --bg-primary: #f0f2f5;
+            --bg-secondary: #ffffff;
+            --bg-tertiary: #e8eaf0;
+            --bg-card: #ffffff;
+            --text-primary: #1a1a2e;
+            --text-secondary: #4a4a6a;
+            --border-color: #d0d0e0;
+        }
+
+        /* ============================
+           RESET Y BASE
+           ============================ */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            font-size: var(--font-size-base);
+        }
+
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+        }
+
+        /* ============================
+           SIDEBAR NAVEGACIÓN
+           ============================ */
+        .sidebar {
+            width: 280px;
+            background: var(--bg-secondary);
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            transition: var(--transition);
+            z-index: 100;
+        }
+
+        .sidebar.collapsed {
+            width: 70px;
+        }
+
+        .sidebar-header {
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .sidebar-header .logo {
+            font-size: 28px;
+            animation: wave 2s ease-in-out infinite;
+        }
+
+        @keyframes wave {
+            0%, 100% { transform: rotate(0deg); }
+            25% { transform: rotate(20deg); }
+            75% { transform: rotate(-10deg); }
+        }
+
+        .sidebar-header h1 {
+            font-size: 1.3rem;
+            background: var(--accent-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 800;
+        }
+
+        .sidebar.collapsed .sidebar-header h1,
+        .sidebar.collapsed .nav-label,
+        .sidebar.collapsed .sidebar-footer-text,
+        .sidebar.collapsed .language-selector {
+            display: none;
+        }
+
+        /* Navegación */
+        .nav-section {
+            padding: 15px 10px;
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .nav-section-title {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            padding: 0 10px;
+            margin-bottom: 8px;
+            letter-spacing: 1.5px;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 15px;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            transition: var(--transition);
+            margin-bottom: 4px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            position: relative;
+        }
+
+        .nav-item:hover {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+        }
+
+        .nav-item.active {
+            background: var(--accent-gradient);
+            color: white;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .nav-item i {
+            font-size: 1.2rem;
+            width: 24px;
+            text-align: center;
+        }
+
+        .nav-item .badge {
+            position: absolute;
+            right: 10px;
+            background: var(--danger);
+            color: white;
+            font-size: 0.6rem;
+            padding: 2px 6px;
+            border-radius: 10px;
+        }
+
+        /* Selector de Lengua de Señas */
+        .language-selector {
+            padding: 15px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .language-selector label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .language-selector select {
+            width: 100%;
+            padding: 10px;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border-color);
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            font-size: 0.9rem;
+            cursor: pointer;
+        }
+
+        /* Sidebar footer */
+        .sidebar-footer {
+            padding: 15px;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--accent-gradient);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+        }
+
+        /* ============================
+           ÁREA PRINCIPAL
+           ============================ */
+        .main-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* Top Bar */
+        .top-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 20px;
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .top-bar-left {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .btn-toggle-sidebar {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 1.2rem;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: var(--radius-sm);
+        }
+
+        .btn-toggle-sidebar:hover {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+        }
+
+        .page-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        .top-bar-right {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .toolbar-btn {
+            padding: 8px 12px;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border-color);
+            background: transparent;
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .toolbar-btn:hover {
+            background: var(--accent-primary);
+            color: white;
+            border-color: var(--accent-primary);
+        }
+
+        .toolbar-btn.active {
+            background: var(--accent-primary);
+            color: white;
+        }
+
+        /* ============================
+           PANELES DE CONTENIDO
+           ============================ */
+        .content-area {
+            flex: 1;
+            display: flex;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .panel {
+            display: none;
+            flex: 1;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .panel.active {
+            display: flex;
+        }
+
+        /* ============================
+           PANEL: CHAT
+           ============================ */
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            scroll-behavior: smooth;
+        }
+
+        .chat-messages::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .chat-messages::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: 3px;
+        }
+
+        .message {
+            max-width: 70%;
+            padding: 15px 20px;
+            border-radius: var(--radius);
+            line-height: 1.7;
+            animation: messageIn 0.3s ease;
+            position: relative;
+        }
+
+        @keyframes messageIn {
+            from { opacity: 0; transform: translateY(15px) scale(0.95); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        .message.user {
+            align-self: flex-end;
+            background: var(--accent-gradient);
+            color: white;
+            border-bottom-right-radius: 4px;
+        }
+
+        .message.ai {
+            align-self: flex-start;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-bottom-left-radius: 4px;
+        }
+
+        .message .source-tag {
+            font-size: 0.65rem;
+            color: var(--text-muted);
+            margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .message.user .source-tag {
+            color: rgba(255,255,255,0.7);
+        }
+
+        /* Typing indicator */
+        .typing-indicator {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            padding: 15px 20px;
+            background: var(--bg-card);
+            border-radius: var(--radius);
+            align-self: flex-start;
+            border: 1px solid var(--border-color);
+        }
+
+        .typing-indicator .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--accent-primary);
+            animation: typingBounce 1.4s infinite;
+        }
+
+        .typing-indicator .dot:nth-child(2) { animation-delay: 0.2s; }
+        .typing-indicator .dot:nth-child(3) { animation-delay: 0.4s; }
+
+        @keyframes typingBounce {
+            0%, 60%, 100% { transform: translateY(0); }
+            30% { transform: translateY(-8px); }
+        }
+
+        /* Input de chat */
+        .chat-input-area {
+            padding: 15px 20px;
+            background: var(--bg-secondary);
+            border-top: 1px solid var(--border-color);
+        }
+
+        .chat-input-wrapper {
+            display: flex;
+            gap: 10px;
+            align-items: flex-end;
+        }
+
+        .chat-input-container {
+            flex: 1;
+            position: relative;
+        }
+
+        #chatInput {
+            width: 100%;
+            padding: 14px 20px;
+            padding-right: 50px;
+            border-radius: 25px;
+            border: 2px solid var(--border-color);
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            font-size: 1rem;
+            font-family: inherit;
+            resize: none;
+            outline: none;
+            transition: var(--transition);
+            min-height: 50px;
+            max-height: 120px;
+        }
+
+        #chatInput:focus {
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 20px rgba(102, 126, 234, 0.2);
+        }
+
+        .input-actions {
+            position: absolute;
+            right: 10px;
+            bottom: 10px;
+            display: flex;
+            gap: 5px;
+        }
+
+        .input-action-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            border: none;
+            background: transparent;
+            color: var(--text-muted);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+        }
+
+        .input-action-btn:hover {
+            background: var(--bg-card);
+            color: var(--accent-primary);
+        }
+
+        .btn-send-msg {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            border: none;
+            background: var(--accent-gradient);
+            color: white;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .btn-send-msg:hover {
+            transform: scale(1.08);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        /* ============================
+           PANEL: CÁMARA (RECONOCIMIENTO)
+           ============================ */
+        .camera-panel {
+            display: flex;
+            gap: 20px;
+            padding: 20px;
+        }
+
+        .camera-container {
+            flex: 2;
+            position: relative;
+            border-radius: var(--radius);
+            overflow: hidden;
+            background: #000;
+        }
+
+        #cameraFeed {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        #canvasOverlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        .camera-overlay-info {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .camera-status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(0,0,0,0.7);
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--danger);
+        }
+
+        .status-dot.active {
+            background: var(--success);
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .detected-sign {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.8);
+            padding: 15px 30px;
+            border-radius: var(--radius);
+            text-align: center;
+            min-width: 200px;
+        }
+
+        .detected-sign .sign-text {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--success);
+        }
+
+        .detected-sign .sign-confidence {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-top: 5px;
+        }
+
+        .camera-sidebar {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            max-width: 350px;
+        }
+
+        .recognition-history {
+            flex: 1;
+            background: var(--bg-card);
+            border-radius: var(--radius);
+            border: 1px solid var(--border-color);
+            padding: 15px;
+            overflow-y: auto;
+        }
+
+        .recognition-history h3 {
+            font-size: 0.9rem;
+            margin-bottom: 10px;
+            color: var(--text-muted);
+        }
+
+        .recognized-word {
+            display: inline-block;
+            background: var(--bg-tertiary);
+            padding: 6px 14px;
+            border-radius: 20px;
+            margin: 3px;
+            font-size: 0.9rem;
+            transition: var(--transition);
+            border: 1px solid var(--border-color);
+        }
+
+        .recognized-word.recent {
+            background: var(--accent-primary);
+            color: white;
+            border-color: var(--accent-primary);
+        }
+
+        .camera-controls {
+            display: flex;
+            gap: 10px;
+        }
+
+        .camera-btn {
+            flex: 1;
+            padding: 12px;
+            border-radius: var(--radius-sm);
+            border: none;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .camera-btn.primary {
+            background: var(--accent-gradient);
+            color: white;
+        }
+
+        .camera-btn.secondary {
+            background: var(--bg-tertiary);
+            color: var(--text-secondary);
+            border: 1px solid var(--border-color);
+        }
+
+        .camera-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow);
+        }
+
+        /* ============================
+           PANEL: AVATAR 3D
+           ============================ */
+        .avatar-panel {
+            display: flex;
+            gap: 20px;
+            padding: 20px;
+        }
+
+        .avatar-viewport {
+            flex: 2;
+            background: var(--bg-card);
+            border-radius: var(--radius);
+            border: 1px solid var(--border-color);
+            position: relative;
+            min-height: 500px;
+        }
+
+        #avatarCanvas {
+            width: 100%;
+            height: 100%;
+            border-radius: var(--radius);
+        }
+
+        .avatar-controls {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            max-width: 350px;
+        }
+
+        .avatar-input-section {
+            background: var(--bg-card);
+            border-radius: var(--radius);
+            border: 1px solid var(--border-color);
+            padding: 20px;
+        }
+
+        .avatar-input-section h3 {
+            font-size: 0.9rem;
+            margin-bottom: 12px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        #avatarTextInput {
+            width: 100%;
+            padding: 12px 15px;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border-color);
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            font-size: 0.95rem;
+            margin-bottom: 10px;
+        }
+
+        .quick-signs {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .quick-sign-btn {
+            padding: 8px 15px;
+            border-radius: 20px;
+            border: 1px solid var(--border-color);
+            background: var(--bg-tertiary);
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: var(--transition);
+        }
+
+        .quick-sign-btn:hover {
+            background: var(--accent-primary);
+            color: white;
+            border-color: var(--accent-primary);
+        }
+
+        /* ============================
+           PANEL: TRANSCRIPCIÓN
+           ============================ */
+        .transcription-panel {
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            gap: 20px;
+        }
+
+        .transcription-display {
+            flex: 1;
+            background: var(--bg-card);
+            border-radius: var(--radius);
+            border: 1px solid var(--border-color);
+            padding: 30px;
+            font-size: 1.4rem;
+            line-height: 2;
+            overflow-y: auto;
+        }
+
+        .transcription-display .live-text {
+            color: var(--text-primary);
+        }
+
+        .transcription-display .interim-text {
+            color: var(--text-muted);
+            font-style: italic;
+        }
+
+        .transcription-controls {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .btn-record {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            border: 3px solid var(--danger);
+            background: transparent;
+            color: var(--danger);
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-record.recording {
+            background: var(--danger);
+            color: white;
+            animation: recordPulse 1.5s infinite;
+        }
+
+        @keyframes recordPulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(231, 76, 60, 0.4); }
+            50% { box-shadow: 0 0 0 15px rgba(231, 76, 60, 0); }
+        }
+
+        /* ============================
+           PANEL: DICCIONARIO
+           ============================ */
+        .dictionary-panel {
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .search-bar {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .search-bar input {
+            flex: 1;
+            padding: 12px 20px;
+            border-radius: 25px;
+            border: 1px solid var(--border-color);
+            background: var(--bg-card);
+            color: var(--text-primary);
+            font-size: 1rem;
+        }
+
+        .dictionary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .dict-card {
+            background: var(--bg-card);
+            border-radius: var(--radius);
+            border: 1px solid var(--border-color);
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .dict-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow);
+            border-color: var(--accent-primary);
+        }
+
+        .dict-card .sign-emoji {
+            font-size: 3rem;
+            margin-bottom: 10px;
+        }
+
+        .dict-card .sign-word {
+            font-weight: 600;
+            font-size: 1.1rem;
+            margin-bottom: 5px;
+        }
+
+        .dict-card .sign-category {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        /* ============================
+           NOTIFICACIÓN VISUAL (FLASH)
+           ============================ */
+        .visual-notification {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            pointer-events: none;
+            z-index: 9999;
+            animation: flashNotify 0.4s ease;
+        }
+
+        .visual-notification.success {
+            background: rgba(46, 204, 113, 0.1);
+        }
+
+        .visual-notification.info {
+            background: rgba(102, 126, 234, 0.1);
+        }
+
+        @keyframes flashNotify {
+            0%, 100% { opacity: 0; }
+            50% { opacity: 1; }
+        }
+
+        /* Toast notifications */
+        .toast-container {
+            position: fixed;
+            top: 80px;
+            right: 20px;
+            z-index: 10000;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .toast {
+            padding: 15px 20px;
+            border-radius: var(--radius-sm);
+            background: var(--bg-card);
+            border-left: 4px solid var(--accent-primary);
+            box-shadow: var(--shadow);
+            animation: slideInRight 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            min-width: 300px;
+        }
+
+        @keyframes slideInRight {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        /* ============================
+           MODAL
+           ============================ */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.7);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 5000;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal {
+            background: var(--bg-secondary);
+            border-radius: var(--radius);
+            border: 1px solid var(--border-color);
+            padding: 30px;
+            max-width: 500px;
+            width: 90%;
+            animation: modalIn 0.3s ease;
+        }
+
+        @keyframes modalIn {
+            from { transform: scale(0.9); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        /* ============================
+           RESPONSIVE
+           ============================ */
+        @media (max-width: 768px) {
+            .sidebar {
+                position: fixed;
+                left: -280px;
+                height: 100vh;
+                z-index: 1000;
+            }
+
+            .sidebar.mobile-open {
+                left: 0;
+            }
+
+            .camera-panel,
+            .avatar-panel {
+                flex-direction: column;
+            }
+
+            .camera-sidebar,
+            .avatar-controls {
+                max-width: 100%;
+            }
+
+            .message {
+                max-width: 90%;
+            }
+
+            .dictionary-grid {
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            }
+        }
+
+        /* ============================
+           WELCOME SCREEN
+           ============================ */
+        .welcome-screen {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            flex: 1;
+            text-align: center;
+            padding: 40px;
+        }
+
+        .welcome-screen .welcome-icon {
+            font-size: 5rem;
+            margin-bottom: 20px;
+            animation: wave 2s ease-in-out infinite;
+        }
+
+        .welcome-screen h2 {
+            font-size: 2rem;
+            margin-bottom: 10px;
+            background: var(--accent-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .welcome-screen p {
+            color: var(--text-secondary);
+            max-width: 500px;
+            line-height: 1.8;
+            margin-bottom: 30px;
+        }
+
+        .welcome-actions {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .welcome-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius);
+            padding: 25px;
+            width: 180px;
+            cursor: pointer;
+            transition: var(--transition);
+            text-align: center;
+        }
+
+        .welcome-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--accent-primary);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.2);
+        }
+
+        .welcome-card i {
+            font-size: 2rem;
+            color: var(--accent-primary);
+            margin-bottom: 10px;
+        }
+
+        .welcome-card h4 {
+            font-size: 0.9rem;
+            margin-bottom: 5px;
+        }
+
+        .welcome-card p {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin: 0;
+        }
+
+        /* Connection status */
+        .connection-status {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .connection-status .dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+        }
+
+        .connection-status .dot.connected { background: var(--success); }
+        .connection-status .dot.disconnected { background: var(--danger); }
+    </style>
+</head>
+<body>
+
+    <!-- ==============================================
+         SIDEBAR - NAVEGACIÓN PRINCIPAL
+         ============================================== -->
+    <aside class="sidebar" id="sidebar">
+        <!-- Logo -->
+        <div class="sidebar-header">
+            <span class="logo">🤟</span>
+            <h1>SignAI</h1>
+        </div>
+
+        <!-- Navegación -->
+        <nav class="nav-section">
+            <div class="nav-section-title">Principal</div>
+
+            <a class="nav-item active" data-panel="chat" onclick="switchPanel('chat')">
+                <i class="fas fa-comments"></i>
+                <span class="nav-label">Chat IA</span>
+            </a>
+
+            <a class="nav-item" data-panel="camera" onclick="switchPanel('camera')">
+                <i class="fas fa-video"></i>
+                <span class="nav-label">Reconocer Señas</span>
+                <span class="badge">LIVE</span>
+            </a>
+
+            <a class="nav-item" data-panel="avatar" onclick="switchPanel('avatar')">
+                <i class="fas fa-user-astronaut"></i>
+                <span class="nav-label">Avatar 3D</span>
+            </a>
+
+            <a class="nav-item" data-panel="transcription" onclick="switchPanel('transcription')">
+                <i class="fas fa-microphone-alt"></i>
+                <span class="nav-label">Transcribir Voz</span>
+            </a>
+
+            <div class="nav-section-title" style="margin-top: 20px;">Herramientas</div>
+
+            <a class="nav-item" data-panel="dictionary" onclick="switchPanel('dictionary')">
+                <i class="fas fa-book"></i>
+                <span class="nav-label">Diccionario</span>
+            </a>
+
+            <a class="nav-item" data-panel="learn" onclick="switchPanel('learn')">
+                <i class="fas fa-graduation-cap"></i>
+                <span class="nav-label">Aprender Señas</span>
+            </a>
+
+            <a class="nav-item" onclick="openSettings()">
+                <i class="fas fa-cog"></i>
+                <span class="nav-label">Configuración</span>
+            </a>
+        </nav>
+
+        <!-- Selector de Lengua de Señas -->
+        <div class="language-selector">
+            <label>🌍 Lengua de Señas</label>
+            <select id="signLanguage" onchange="changeSignLanguage(this.value)">
+                <option value="LSC">🇨🇴 LSC - Colombiana</option>
+                <option value="ASL">🇺🇸 ASL - Americana</option>
+                <option value="LSE">🇪🇸 LSE - Española</option>
+                <option value="LSM">🇲🇽 LSM - Mexicana</option>
+                <option value="LSA">🇦🇷 LSA - Argentina</option>
+                <option value="LSP">🇵🇪 LSP - Peruana</option>
+                <option value="LIBRAS">🇧🇷 LIBRAS - Brasileña</option>
+                <option value="LSCh">🇨🇱 LSCh - Chilena</option>
+            </select>
+        </div>
+
+        <!-- Usuario -->
+        <div class="sidebar-footer">
+            <div class="user-avatar">👤</div>
+            <div class="sidebar-footer-text">
+                <div style="font-size: 0.85rem; font-weight: 600;">Usuario</div>
+                <div class="connection-status">
+                    <span class="dot connected" id="connectionDot"></span>
+                    <span id="connectionText">Conectado</span>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- ==============================================
+         ÁREA PRINCIPAL
+         ============================================== -->
+    <main class="main-area">
+
+        <!-- Top Bar -->
+        <header class="top-bar">
+            <div class="top-bar-left">
+                <button class="btn-toggle-sidebar" onclick="toggleSidebar()" aria-label="Toggle sidebar">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <span class="page-title" id="pageTitle">💬 Chat IA</span>
+            </div>
+
+            <div class="top-bar-right">
+                <button class="toolbar-btn" onclick="changeFontSize(1)" title="Aumentar texto">
+                    <i class="fas fa-plus"></i> A
+                </button>
+                <button class="toolbar-btn" onclick="changeFontSize(-1)" title="Reducir texto">
+                    <i class="fas fa-minus"></i> A
+                </button>
+                <button class="toolbar-btn" onclick="toggleTheme('high-contrast')" title="Alto contraste">
+                    <i class="fas fa-adjust"></i>
+                </button>
+                <button class="toolbar-btn" onclick="toggleTheme('light')" title="Tema claro">
+                    <i class="fas fa-sun"></i>
+                </button>
+                <button class="toolbar-btn" onclick="toggleTheme('dark')" title="Tema oscuro">
+                    <i class="fas fa-moon"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- Contenido -->
+        <div class="content-area">
+
+            <!-- ============================
+                 PANEL: CHAT
+                 ============================ -->
+            <div class="panel active" id="panel-chat">
+                <!-- Mensajes -->
+                <div class="chat-messages" id="chatMessages">
+                    <!-- Welcome -->
+                    <div class="welcome-screen" id="welcomeScreen">
+                        <div class="welcome-icon">🤟</div>
+                        <h2>¡Bienvenido a SignAI!</h2>
+                        <p>
+                            Tu asistente de inteligencia artificial diseñado
+                            especialmente para personas sordas. Comunicación
+                            sin barreras. 🌟
+                        </p>
+                        <div class="welcome-actions">
+                            <div class="welcome-card" onclick="switchPanel('chat'); focusChat();">
+                                <i class="fas fa-comments"></i>
+                                <h4>Chatear</h4>
+                                <p>Escribe tu pregunta</p>
+                            </div>
+                            <div class="welcome-card" onclick="switchPanel('camera')">
+                                <i class="fas fa-hand-paper"></i>
+                                <h4>Señas</h4>
+                                <p>Usa la cámara</p>
+                            </div>
+                            <div class="welcome-card" onclick="switchPanel('avatar')">
+                                <i class="fas fa-user-astronaut"></i>
+                                <h4>Avatar</h4>
+                                <p>Ver señas en 3D</p>
+                            </div>
+                            <div class="welcome-card" onclick="switchPanel('transcription')">
+                                <i class="fas fa-microphone-alt"></i>
+                                <h4>Transcribir</h4>
+                                <p>Voz → Texto</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Input -->
+                <div class="chat-input-area">
+                    <div class="chat-input-wrapper">
+                        <textarea
+                            id="chatInput"
+                            placeholder="Escribe tu mensaje... ✍️"
+                            rows="1"
+                            onkeydown="handleChatKeydown(event)"
+                            oninput="autoResize(this)"
+                        ></textarea>
+                        <button class="btn-send-msg" onclick="sendChatMessage()" title="Enviar mensaje">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ============================
+                 PANEL: CÁMARA / RECONOCIMIENTO
+                 ============================ -->
+            <div class="panel" id="panel-camera">
+                <div class="camera-panel">
+                    <!-- Vista de cámara -->
+                    <div class="camera-container">
+                        <video id="cameraFeed" autoplay playsinline></video>
+                        <canvas id="canvasOverlay"></canvas>
+
+                        <div class="camera-overlay-info">
+                            <div class="camera-status">
+                                <span class="status-dot" id="cameraStatusDot"></span>
+                                <span id="cameraStatusText">Cámara apagada</span>
+                            </div>
+                            <div class="camera-status" id="fpsDisplay" style="display:none">
+                                <i class="fas fa-tachometer-alt"></i>
+                                <span id="fpsValue">0 FPS</span>
+                            </div>
+                        </div>
+
+                        <div class="detected-sign" id="detectedSign" style="display:none">
+                            <div class="sign-text" id="signText">HOLA</div>
+                            <div class="sign-confidence" id="signConfidence">98% confianza</div>
+                        </div>
+                    </div>
+
+                    <!-- Panel lateral -->
+                    <div class="camera-sidebar">
+                        <!-- Controles de cámara -->
+                        <div style="display: flex; flex-direction: column; gap: 10px;">
+                            <button class="camera-btn primary" id="btnStartCamera" onclick="toggleCamera()">
+                                <i class="fas fa-video"></i> Iniciar Cámara
+                            </button>
+                            <div class="camera-controls">
+                                <button class="camera-btn secondary" onclick="switchCameraDirection()">
+                                    <i class="fas fa-sync-alt"></i> Girar
+                                </button>
+                                <button class="camera-btn secondary" onclick="clearRecognitionHistory()">
+                                    <i class="fas fa-trash"></i> Limpiar
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Historial de reconocimiento -->
+                        <div class="recognition-history">
+                            <h3>📝 Señas Reconocidas</h3>
+                            <div id="recognizedWords">
+                                <span style="color: var(--text-muted); font-size: 0.85rem;">
+                                    Inicia la cámara y haz señas frente a ella...
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- Frase formada -->
+                        <div class="avatar-input-section">
+                            <h3>📋 Frase Formada</h3>
+                            <div id="formedSentence" style="
+                                min-height: 60px;
+                                background: var(--bg-tertiary);
+                                border-radius: var(--radius-sm);
+                                padding: 12px;
+                                font-size: 1.1rem;
+                                line-height: 1.6;
+                            ">
+                                <span style="color: var(--text-muted);">
+                                    Las señas reconocidas aparecerán aquí...
+                                </span>
+                            </div>
+                            <button class="camera-btn primary" style="margin-top: 10px; width: 100%;"
+                                    onclick="sendRecognizedToChat()">
+                                <i class="fas fa-paper-plane"></i> Enviar al Chat
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ============================
+                 PANEL: AVATAR 3D
+                 ============================ -->
+            <div class="panel" id="panel-avatar">
+                <div class="avatar-panel">
+                    <!-- Viewport 3D -->
+                    <div class="avatar-viewport">
+                        <canvas id="avatarCanvas"></canvas>
+                        <div style="
+                            position: absolute;
+                            top: 15px;
+                            left: 15px;
+                            background: rgba(0,0,0,0.6);
+                            padding: 8px 15px;
+                            border-radius: 20px;
+                            font-size: 0.8rem;
+                        ">
+                            🤖 Avatar 3D
+                        </div>
+                    </div>
+
+                    <!-- Controles del avatar -->
+                    <div class="avatar-controls">
+                        <div class="avatar-input-section">
+                            <h3>✍️ Texto → Señas</h3>
+                            <input type="text" id="avatarTextInput"
+                                   placeholder="Escribe una palabra o frase..."
+                                   onkeypress="if(event.key==='Enter') animateAvatarSign()">
+                            <button class="camera-btn primary" style="width: 100%;"
+                                    onclick="animateAvatarSign()">
+                                <i class="fas fa-play"></i> Animar Seña
+                            </button>
+                        </div>
+
+                        <div class="avatar-input-section">
+                            <h3>⚡ Señas Rápidas</h3>
+                            <div class="quick-signs">
+                                <button class="quick-sign-btn" onclick="quickSign('hola')">👋 Hola</button>
+                                <button class="quick-sign-btn" onclick="quickSign('gracias')">🙏 Gracias</button>
+                                <button class="quick-sign-btn" onclick="quickSign('por favor')">🤲 Por favor</button>
+                                <button class="quick-sign-btn" onclick="quickSign('si')">✅ Sí</button>
+                                <button class="quick-sign-btn" onclick="quickSign('no')">❌ No</button>
+                                <button class="quick-sign-btn" onclick="quickSign('ayuda')">🆘 Ayuda</button>
+                                <button class="quick-sign-btn" onclick="quickSign('nombre')">📛 Nombre</button>
+                                <button class="quick-sign-btn" onclick="quickSign('bien')">👍 Bien</button>
+                                <button class="quick-sign-btn" onclick="quickSign('mal')">👎 Mal</button>
+                                <button class="quick-sign-btn" onclick="quickSign('agua')">💧 Agua</button>
+                                <button class="quick-sign-btn" onclick="quickSign('comida')">🍽️ Comida</button>
+                                <button class="quick-sign-btn" onclick="quickSign('familia')">👨‍👩‍👧 Familia</button>
+                            </div>
+                        </div>
+
+                        <div class="avatar-input-section">
+                            <h3>⚙️ Avatar</h3>
+                            <div style="display: flex; flex-direction: column; gap: 10px;">
+                                <label style="font-size: 0.85rem; color: var(--text-secondary);">
+                                    Velocidad
+                                </label>
+                                <input type="range" id="avatarSpeed" min="0.5" max="2" step="0.1" value="1"
+                                       style="width: 100%;">
+                                <label style="font-size: 0.85rem; color: var(--text-secondary);">
+                                    Repetir
+                                </label>
+                                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                    <input type="checkbox" id="avatarRepeat">
+                                    <span style="font-size: 0.85rem;">Repetir animación</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ============================
+                 PANEL: TRANSCRIPCIÓN
+                 ============================ -->
+            <div class="panel" id="panel-transcription">
+                <div class="transcription-panel">
+                    <div style="text-align: center; padding: 10px;">
+                        <h2 style="margin-bottom: 5px;">🎤 → 📝 Transcripción en Vivo</h2>
+                        <p style="color: var(--text-muted); font-size: 0.9rem;">
+                            Activa el micrófono para ver en texto lo que alguien dice
+                        </p>
+                    </div>
+
+                    <div class="transcription-display" id="transcriptionDisplay">
+                        <p style="color: var(--text-muted); text-align: center; margin-top: 50px;">
+                            Presiona el botón del micrófono para comenzar... 🎙️
+                        </p>
+                    </div>
+
+                    <div class="transcription-controls">
+                        <button class="camera-btn secondary" onclick="clearTranscription()">
+                            <i class="fas fa-trash"></i> Limpiar
+                        </button>
+                        <button class="btn-record" id="btnRecord" onclick="toggleTranscription()">
+                            <i class="fas fa-microphone"></i>
+                        </button>
+                        <button class="camera-btn secondary" onclick="copyTranscription()">
+                            <i class="fas fa-copy"></i> Copiar
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ============================
+                 PANEL: DICCIONARIO
+                 ============================ -->
+            <div class="panel" id="panel-dictionary">
+                <div class="dictionary-panel">
+                    <div class="search-bar">
+                        <input type="text" id="dictSearch"
+                               placeholder="🔍 Buscar una seña..."
+                               oninput="searchDictionary(this.value)">
+                    </div>
+
+                    <div class="dictionary-grid" id="dictionaryGrid">
+                        <!-- Se llena dinámicamente -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- ============================
+                 PANEL: APRENDER
+                 ============================ -->
+            <div class="panel" id="panel-learn">
+                <div style="padding: 30px; text-align: center;">
+                    <h2 style="margin-bottom: 15px;">🎓 Aprender Lengua de Señas</h2>
+                    <p style="color: var(--text-muted); margin-bottom: 30px;">
+                        Lecciones interactivas con IA
+                    </p>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 20px;">
+                        <div class="dict-card" onclick="startLesson('alphabet')">
+                            <div class="sign-emoji">🔤</div>
+                            <div class="sign-word">Abecedario</div>
+                            <div class="sign-category">Nivel básico</div>
+                        </div>
+                        <div class="dict-card" onclick="startLesson('numbers')">
+                            <div class="sign-emoji">🔢</div>
+                            <div class="sign-word">Números</div>
+                            <div class="sign-category">Nivel básico</div>
+                        </div>
+                        <div class="dict-card" onclick="startLesson('greetings')">
+                            <div class="sign-emoji">👋</div>
+                            <div class="sign-word">Saludos</div>
+                            <div class="sign-category">Nivel básico</div>
+                        </div>
+                        <div class="dict-card" onclick="startLesson('family')">
+                            <div class="sign-emoji">👨‍👩‍👧‍👦</div>
+                            <div class="sign-word">Familia</div>
+                            <div class="sign-category">Nivel intermedio</div>
+                        </div>
+                        <div class="dict-card" onclick="startLesson('emotions')">
+                            <div class="sign-emoji">😊</div>
+                            <div class="sign-word">Emociones</div>
+                            <div class="sign-category">Nivel intermedio</div>
+                        </div>
+                        <div class="dict-card" onclick="startLesson('daily')">
+                            <div class="sign-emoji">📅</div>
+                            <div class="sign-word">Vida Diaria</div>
+                            <div class="sign-category">Nivel avanzado</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- ==============================================
+         TOAST CONTAINER
+         ============================================== -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- ==============================================
+         MODAL DE CONFIGURACIÓN
+         ============================================== -->
+    <div class="modal-overlay" id="settingsModal">
+        <div class="modal">
+            <h2 style="margin-bottom: 20px;">⚙️ Configuración</h2>
+
+            <div style="display: flex; flex-direction: column; gap: 15px;">
+                <div>
+                    <label style="font-size: 0.85rem; color: var(--text-muted);">
+                        URL del Servidor Backend
+                    </label>
+                    <input type="text" id="serverUrl" value="http://localhost:5000"
+                           style="width: 100%; padding: 10px; border-radius: 8px;
+                                  border: 1px solid var(--border-color);
+                                  background: var(--bg-tertiary);
+                                  color: var(--text-primary); margin-top: 5px;">
+                </div>
+
+                <div>
+                    <label style="font-size: 0.85rem; color: var(--text-muted);">
+                        Tamaño de fuente base
+                    </label>
+                    <input type="range" id="baseFontSize" min="14" max="32" value="18"
+                           style="width: 100%;"
+                           oninput="document.documentElement.style.fontSize = this.value + 'px'">
+                </div>
+
+                <div>
+                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                        <input type="checkbox" id="flashNotifications" checked>
+                        <span style="font-size: 0.9rem;">Notificaciones visuales (flash)</span>
+                    </label>
+                </div>
+
+                <div>
+                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                        <input type="checkbox" id="vibrationNotifications" checked>
+                        <span style="font-size: 0.9rem;">Vibración en móvil</span>
+                    </label>
+                </div>
+            </div>
+
+            <div style="display: flex; gap: 10px; margin-top: 25px;">
+                <button class="camera-btn primary" style="flex: 1;" onclick="saveSettings()">
+                    <i class="fas fa-save"></i> Guardar
+                </button>
+                <button class="camera-btn secondary" style="flex: 1;" onclick="closeSettings()">
+                    Cerrar
+                </button>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- ==============================================
+         JAVASCRIPT PRINCIPAL
+         ============================================== -->
+    <script>
+    // ============================================
+    // CONFIGURACIÓN GLOBAL
+    // ============================================
+    const APP = {
+        serverUrl: localStorage.getItem('serverUrl') || 'http://localhost:5000',
+        signLanguage: localStorage.getItem('signLanguage') || 'LSC',
+        currentPanel: 'chat',
+        conversationHistory: [],
+        isRecording: false,
+        isCameraActive: false,
+        recognition: null,           // SpeechRecognition
+        cameraStream: null,
+        mediapipeHands: null,
+        recognizedSigns: [],
+        fontSize: parseInt(localStorage.getItem('fontSize')) || 18,
+    };
+
+    // ============================================
+    // API - CONEXIÓN CON BACKEND
+    // ============================================
+    const API = {
+        /**
+         * Enviar mensaje al chat IA
+         */
+        async sendMessage(message) {
+            try {
+                const response = await fetch(`${APP.serverUrl}/api/chat`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        message: message,
+                        history: APP.conversationHistory,
+                        language: APP.signLanguage
+                    })
+                });
+
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                return await response.json();
+
+            } catch (error) {
+                console.error('Error API chat:', error);
+                // Fallback: respuesta local si no hay servidor
+                return this.fallbackResponse(message);
+            }
+        },
+
+        /**
+         * Enviar frame para reconocimiento de señas
+         */
+        async recognizeSign(frameData) {
+            try {
+                const response = await fetch(`${APP.serverUrl}/api/recognize`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        frame: frameData,
+                        language: APP.signLanguage
+                    })
+                });
+
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                return await response.json();
+
+            } catch (error) {
+                console.error('Error API recognition:', error);
+                return null;
+            }
+        },
+
+        /**
+         * Obtener animación de seña para avatar
+         */
+        async getSignAnimation(word) {
+            try {
+                const response = await fetch(`${APP.serverUrl}/api/avatar/animate`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        text: word,
+                        language: APP.signLanguage
+                    })
+                });
+
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                return await response.json();
+
+            } catch (error) {
+                console.error('Error API avatar:', error);
+                return null;
+            }
+        },
+
+        /**
+         * Obtener diccionario de señas
+         */
+        async getDictionary(searchTerm = '') {
+            try {
+                const response = await fetch(
+                    `${APP.serverUrl}/api/dictionary?lang=${APP.signLanguage}&q=${searchTerm}`
+                );
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                return await response.json();
+
+            } catch (error) {
+                console.error('Error API dictionary:', error);
+                return this.fallbackDictionary(searchTerm);
+            }
+        },
+
+        /**
+         * Verificar conexión con el servidor
+         */
+        async checkConnection() {
+            try {
+                const response = await fetch(`${APP.serverUrl}/api/health`, {
+                    method: 'GET',
+                    signal: AbortSignal.timeout(5000)
+                });
+                return response.ok;
+            } catch {
+                return false;
+            }
+        },
+
+        /**
+         * Respuesta de fallback cuando no hay servidor
+         */
+        fallbackResponse(message) {
+            const lowerMsg = message.toLowerCase();
+            let response = '';
+
+            if (lowerMsg.includes('hola') || lowerMsg.includes('hi')) {
+                response = '👋 ¡Hola! Soy SignAI. Estoy funcionando en modo offline.\n\n' +
+                           '⚠️ Para funciones completas, inicia el servidor backend.\n\n' +
+                           '¿En qué puedo intentar ayudarte? 🤟';
+            } else if (lowerMsg.includes('ayuda') || lowerMsg.includes('help')) {
+                response = '🆘 **Funciones disponibles:**\n\n' +
+                           '💬 Chat (modo offline limitado)\n' +
+                           '📹 Cámara para reconocimiento de señas\n' +
+                           '🎤→📝 Transcripción de voz a texto\n' +
+                           '📖 Diccionario de señas\n\n' +
+                           '💡 Para IA completa, configura el servidor en ⚙️';
+            } else {
+                response = `📝 Recibí tu mensaje: "${message}"\n\n` +
+                           '⚠️ Estoy en modo offline. Para respuestas inteligentes ' +
+                           'con IA, necesitas:\n\n' +
+                           '1. Iniciar el servidor backend\n' +
+                           '2. O configurar una API key en ⚙️\n\n' +
+                           'Mientras tanto, puedes usar:\n' +
+                           '📹 Reconocimiento de señas\n' +
+                           '🎤 Transcripción de voz\n' +
+                           '📖 Diccionario offline';
+            }
+
+            return { response, offline: true };
+        },
+
+        /**
+         * Diccionario de fallback
+         */
+        fallbackDictionary(search) {
+            const signs = [
+                { word: 'Hola', emoji: '👋', category: 'Saludos', description: 'Mano abierta, movimiento lateral' },
+                { word: 'Gracias', emoji: '🙏', category: 'Cortesía', description: 'Mano desde la boca hacia afuera' },
+                { word: 'Por favor', emoji: '🤲', category: 'Cortesía', description: 'Círculo en el pecho' },
+                { word: 'Sí', emoji: '✅', category: 'Básico', description: 'Puño cerrado, movimiento de asentir' },
+                { word: 'No', emoji: '❌', category: 'Básico', description: 'Dedos índice y medio juntos, separar' },
+                { word: 'Ayuda', emoji: '🆘', category: 'Emergencia', description: 'Puño sobre palma abierta, subir' },
+                { word: 'Agua', emoji: '💧', category: 'Necesidades', description: 'W en la boca' },
+                { word: 'Comida', emoji: '🍽️', category: 'Necesidades', description: 'Mano hacia la boca' },
+                { word: 'Familia', emoji: '👨‍👩‍👧', category: 'Personas', description: 'F con ambas manos, círculo' },
+                { word: 'Amigo', emoji: '🤝', category: 'Personas', description: 'Índices enganchados' },
+                { word: 'Casa', emoji: '🏠', category: 'Lugares', description: 'Manos en triángulo' },
+                { word: 'Escuela', emoji: '🏫', category: 'Lugares', description: 'Palmas hacia abajo, aplaudir' },
+                { word: 'Amor', emoji: '❤️', category: 'Emociones', description: 'Brazos cruzados en el pecho' },
+                { word: 'Feliz', emoji: '😊', category: 'Emociones', description: 'Círculos en el pecho' },
+                { word: 'Triste', emoji: '😢', category: 'Emociones', description: 'Dedos bajan por la cara' },
+                { word: 'Nombre', emoji: '📛', category: 'Básico', description: 'Dedos H, golpear dos veces' },
+            ];
+
+            if (search) {
+                return { signs: signs.filter(s =>
+                    s.word.toLowerCase().includes(search.toLowerCase())
+                )};
+            }
+            return { signs };
+        }
+    };
+
+    // ============================================
+    // NAVEGACIÓN Y PANELES
+    // ============================================
+    function switchPanel(panelName) {
+        // Ocultar todos los paneles
+        document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+
+        // Mostrar el panel seleccionado
+        const panel = document.getElementById(`panel-${panelName}`);
+        if (panel) panel.classList.add('active');
+
+        // Actualizar navegación
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.classList.toggle('active', item.dataset.panel === panelName);
+        });
+
+        // Actualizar título
+        const titles = {
+            chat: '💬 Chat IA',
+            camera: '📹 Reconocimiento de Señas',
+            avatar: '🤖 Avatar 3D',
+            transcription: '🎤 Transcripción',
+            dictionary: '📖 Diccionario de Señas',
+            learn: '🎓 Aprender Señas'
+        };
+        document.getElementById('pageTitle').textContent = titles[panelName] || '';
+
+        APP.currentPanel = panelName;
+
+        // Inicializar componentes específicos
+        if (panelName === 'dictionary') loadDictionary();
+        if (panelName === 'avatar') initAvatar3D();
+
+        // Cerrar sidebar en móvil
+        if (window.innerWidth <= 768) {
+            document.getElementById('sidebar').classList.remove('mobile-open');
+        }
+    }
+
+    function toggleSidebar() {
+        const sidebar = document.getElementById('sidebar');
+        if (window.innerWidth <= 768) {
+            sidebar.classList.toggle('mobile-open');
+        } else {
+            sidebar.classList.toggle('collapsed');
+        }
+    }
+
+    // ============================================
+    // CHAT
+    // ============================================
+    function handleChatKeydown(event) {
+        if (event.key === 'Enter' && !event.shiftKey) {
+            event.preventDefault();
+            sendChatMessage();
+        }
+    }
+
+    function autoResize(textarea) {
+        textarea.style.height = 'auto';
+        textarea.style.height = Math.min(textarea.scrollHeight, 120) + 'px';
+    }
+
+    async function sendChatMessage() {
+        const input = document.getElementById('chatInput');
+        const message = input.value.trim();
+        if (!message) return;
+
+        // Ocultar welcome
+        const welcome = document.getElementById('welcomeScreen');
+        if (welcome) welcome.style.display = 'none';
+
+        // Mostrar mensaje del usuario
+        addChatMessage(message, 'user');
+        input.value = '';
+        input.style.height = 'auto';
+
+        // Mostrar indicador de "pensando"
+        showTypingIndicator();
+
+        try {
+            const data = await API.sendMessage(message);
+            removeTypingIndicator();
+            addChatMessage(data.response, 'ai', data.offline);
+
+            // Guardar en historial
+            APP.conversationHistory.push(
+                { role: 'user', content: message },
+                { role: 'assistant', content: data.response }
+            );
+
+            // Notificaciones
+            showVisualNotification('success');
+            vibrate();
+
+        } catch (error) {
+            removeTypingIndicator();
+            addChatMessage('⚠️ Error al comunicarse con el servidor. Revisa la conexión.', 'ai');
+        }
+    }
+
+    function addChatMessage(text, type, isOffline = false) {
+        const container = document.getElementById('chatMessages');
+        const div = document.createElement('div');
+        div.className = `message ${type}`;
+
+        const sourceIcon = type === 'user' ? '👤 Tú' : '🤖 SignAI';
+        const offlineTag = isOffline ? ' <span style="color: var(--warning);">(offline)</span>' : '';
+
+        div.innerHTML = `
+            <div class="source-tag">${sourceIcon}${offlineTag}</div>
+            <div>${formatMessage(text)}</div>
+        `;
+
+        div.style.fontSize = APP.fontSize + 'px';
+        container.appendChild(div);
+        container.scrollTop = container.scrollHeight;
+    }
+
+    function formatMessage(text) {
+        // Formato básico de markdown
+        return text
+            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+            .replace(/\n/g, '<br>');
+    }
+
+    function showTypingIndicator() {
+        const container = document.getElementById('chatMessages');
+        const div = document.createElement('div');
+        div.className = 'typing-indicator';
+        div.id = 'typingIndicator';
+        div.innerHTML = `
+            <span class="dot"></span>
+            <span class="dot"></span>
+            <span class="dot"></span>
+        `;
+        container.appendChild(div);
+        container.scrollTop = container.scrollHeight;
+    }
+
+    function removeTypingIndicator() {
+        const el = document.getElementById('typingIndicator');
+        if (el) el.remove();
+    }
+
+    function focusChat() {
+        document.getElementById('chatInput').focus();
+    }
+
+    // ============================================
+    // CÁMARA - RECONOCIMIENTO DE SEÑAS
+    // ============================================
+    async function toggleCamera() {
+        const btn = document.getElementById('btnStartCamera');
+        const statusDot = document.getElementById('cameraStatusDot');
+        const statusText = document.getElementById('cameraStatusText');
+
+        if (APP.isCameraActive) {
+            // Apagar cámara
+            if (APP.cameraStream) {
+                APP.cameraStream.getTracks().forEach(t => t.stop());
+            }
+            document.getElementById('cameraFeed').srcObject = null;
+            APP.isCameraActive = false;
+            btn.innerHTML = '<i class="fas fa-video"></i> Iniciar Cámara';
+            statusDot.classList.remove('active');
+            statusText.textContent = 'Cámara apagada';
+            document.getElementById('fpsDisplay').style.display = 'none';
+
+        } else {
+            // Encender cámara
+            try {
+                APP.cameraStream = await navigator.mediaDevices.getUserMedia({
+                    video: { facingMode: 'user', width: 640, height: 480 }
+                });
+                document.getElementById('cameraFeed').srcObject = APP.cameraStream;
+                APP.isCameraActive = true;
+                btn.innerHTML = '<i class="fas fa-video-slash"></i> Detener Cámara';
+                statusDot.classList.add('active');
+                statusText.textContent = `Reconociendo ${APP.signLanguage}...`;
+                document.getElementById('fpsDisplay').style.display = 'flex';
+
+                // Iniciar reconocimiento con MediaPipe
+                initMediaPipeHands();
+                showToast('📹 Cámara activada', 'Haz señas frente a la cámara');
+
+            } catch (error) {
+                console.error('Error cámara:', error);
+                showToast('❌ Error', 'No se pudo acceder a la cámara', 'danger');
+            }
+        }
+    }
+
+    function initMediaPipeHands() {
+        if (typeof Hands === 'undefined') {
+            console.warn('MediaPipe Hands no cargado');
+            return;
+        }
+
+        const hands = new Hands({
+            locateFile: (file) =>
+                `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`
+        });
+
+        hands.setOptions({
+            maxNumHands: 2,
+            modelComplexity: 1,
+            minDetectionConfidence: 0.7,
+            minTrackingConfidence: 0.5
+        });
+
+        hands.onResults(onHandResults);
+
+        const video = document.getElementById('cameraFeed');
+        const canvas = document.getElementById('canvasOverlay');
+        const ctx = canvas.getContext('2d');
+
+        let lastTime = performance.now();
+        let frameCount = 0;
+
+        async function processFrame() {
+            if (!APP.isCameraActive) return;
+
+            if (video.readyState >= 2) {
+                canvas.width = video.videoWidth;
+                canvas.height = video.videoHeight;
+                await hands.send({ image: video });
+
+                // FPS
+                frameCount++;
+                const now = performance.now();
+                if (now - lastTime >= 1000) {
+                    document.getElementById('fpsValue').textContent = frameCount + ' FPS';
+                    frameCount = 0;
+                    lastTime = now;
+                }
+            }
+
+            requestAnimationFrame(processFrame);
+        }
+
+        processFrame();
+    }
+
+    function onHandResults(results) {
+        const canvas = document.getElementById('canvasOverlay');
+        const ctx = canvas.getContext('2d');
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        if (results.multiHandLandmarks) {
+            for (const landmarks of results.multiHandLandmarks) {
+                // Dibujar conexiones
+                if (typeof drawConnectors !== 'undefined') {
+                    drawConnectors(ctx, landmarks, HAND_CONNECTIONS, {
+                        color: '#667eea',
+                        lineWidth: 3
+                    });
+                    drawLandmarks(ctx, landmarks, {
+                        color: '#764ba2',
+                        lineWidth: 1,
+                        radius: 4
+                    });
+                }
+            }
+
+            // Enviar al backend para clasificación
+            sendFrameForRecognition(results.multiHandLandmarks);
+        }
+    }
+
+    let recognitionThrottle = 0;
+    async function sendFrameForRecognition(landmarks) {
+        const now = Date.now();
+        if (now - recognitionThrottle < 500) return; // Max 2 por segundo
+        recognitionThrottle = now;
+
+        // Preparar datos
+        const landmarkData = landmarks.map(hand =>
+            hand.map(lm => [lm.x, lm.y, lm.z])
+        );
+
+        const result = await API.recognizeSign(landmarkData);
+        if (result && result.sign && result.confidence > 0.75) {
+            displayRecognizedSign(result.sign, result.confidence);
+        }
+    }
+
+    function displayRecognizedSign(sign, confidence) {
+        // Mostrar en overlay de cámara
+        const detectedDiv = document.getElementById('detectedSign');
+        detectedDiv.style.display = 'block';
+        document.getElementById('signText').textContent = sign.toUpperCase();
+        document.getElementById('signConfidence').textContent =
+            `${(confidence * 100).toFixed(0)}% confianza`;
+
+        // Agregar al historial
+        APP.recognizedSigns.push(sign);
+        updateRecognitionHistory();
+
+        // Vibrar
+        vibrate();
+        showVisualNotification('info');
+
+        // Ocultar después de 2 segundos
+        setTimeout(() => {
+            detectedDiv.style.display = 'none';
+        }, 2000);
+    }
+
+    function updateRecognitionHistory() {
+        const container = document.getElementById('recognizedWords');
+        container.innerHTML = APP.recognizedSigns.map((word, i) => {
+            const isRecent = i === APP.recognizedSigns.length - 1;
+            return `<span class="recognized-word ${isRecent ? 'recent' : ''}">${word}</span>`;
+        }).join('');
+
+        // Actualizar frase formada
+        document.getElementById('formedSentence').textContent =
+            APP.recognizedSigns.join(' ');
+    }
+
+    function clearRecognitionHistory() {
+        APP.recognizedSigns = [];
+        document.getElementById('recognizedWords').innerHTML =
+            '<span style="color: var(--text-muted); font-size: 0.85rem;">Limpiado ✨</span>';
+        document.getElementById('formedSentence').innerHTML =
+            '<span style="color: var(--text-muted);">Las señas reconocidas aparecerán aquí...</span>';
+    }
+
+    function sendRecognizedToChat() {
+        if (APP.recognizedSigns.length === 0) {
+            showToast('⚠️', 'No hay señas reconocidas para enviar');
+            return;
+        }
+        const sentence = APP.recognizedSigns.join(' ');
+        document.getElementById('chatInput').value = sentence;
+        switchPanel('chat');
+        sendChatMessage();
+        APP.recognizedSigns = [];
+    }
+
+    function switchCameraDirection() {
+        // Cambiar entre cámara frontal y trasera
+        showToast('📹', 'Cambiando cámara...');
+        // Implementar lógica de cambio
+    }
+
+    // ============================================
+    // AVATAR 3D
+    // ============================================
+    let avatarScene, avatarCamera, avatarRenderer, avatarMixer;
+    let avatarInitialized = false;
+
+    function initAvatar3D() {
+        if (avatarInitialized) return;
+
+        const canvas = document.getElementById('avatarCanvas');
+        const container = canvas.parentElement;
+
+        // Scene
+        avatarScene = new THREE.Scene();
+        avatarScene.background = new THREE.Color(0x1e1e4a);
+
+        // Camera
+        avatarCamera = new THREE.PerspectiveCamera(
+            60,
+            container.clientWidth / container.clientHeight,
+            0.1,
+            1000
+        );
+        avatarCamera.position.set(0, 1.5, 3);
+        avatarCamera.lookAt(0, 1, 0);
+
+        // Renderer
+        avatarRenderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+        avatarRenderer.setSize(container.clientWidth, container.clientHeight);
+        avatarRenderer.setPixelRatio(window.devicePixelRatio);
+
+        // Lights
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+        avatarScene.add(ambientLight);
+
+        const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+        directionalLight.position.set(2, 3, 2);
+        avatarScene.add(directionalLight);
+
+        // Placeholder avatar (cuerpo simple)
+        createPlaceholderAvatar();
+
+        // Grid
+        const grid = new THREE.GridHelper(10, 10, 0x333366, 0x222244);
+        avatarScene.add(grid);
+
+        avatarInitialized = true;
+
+        // Render loop
+        function animate() {
+            requestAnimationFrame(animate);
+
+            if (avatarMixer) {
+                const delta = clock.getDelta();
+                avatarMixer.update(delta);
+            }
+
+            avatarRenderer.render(avatarScene, avatarCamera);
+        }
+
+        const clock = new THREE.Clock();
+        animate();
+
+        // Resize
+        window.addEventListener('resize', () => {
+            avatarCamera.aspect = container.clientWidth / container.clientHeight;
+            avatarCamera.updateProjectionMatrix();
+            avatarRenderer.setSize(container.clientWidth, container.clientHeight);
+        });
+    }
+
+    function createPlaceholderAvatar() {
+        const group = new THREE.Group();
+
+        // Torso
+        const torsoGeo = new THREE.BoxGeometry(0.6, 0.8, 0.3);
+        const torsoMat = new THREE.MeshPhongMaterial({ color: 0x667eea });
+        const torso = new THREE.Mesh(torsoGeo, torsoMat);
+        torso.position.y = 1;
+        group.add(torso);
+
+        // Cabeza
+        const headGeo = new THREE.SphereGeometry(0.2, 32, 32);
+        const headMat = new THREE.MeshPhongMaterial({ color: 0xffcc99 });
+        const head = new THREE.Mesh(headGeo, headMat);
+        head.position.y = 1.6;
+        group.add(head);
+
+        // Brazos
+        const armGeo = new THREE.CylinderGeometry(0.06, 0.06, 0.6);
+        const armMat = new THREE.MeshPhongMaterial({ color: 0xffcc99 });
+
+        const leftArm = new THREE.Mesh(armGeo, armMat);
+        leftArm.position.set(-0.45, 1, 0);
+        leftArm.rotation.z = Math.PI / 6;
+        leftArm.name = 'leftArm';
+        group.add(leftArm);
+
+        const rightArm = new THREE.Mesh(armGeo, armMat);
+        rightArm.position.set(0.45, 1, 0);
+        rightArm.rotation.z = -Math.PI / 6;
+        rightArm.name = 'rightArm';
+        group.add(rightArm);
+
+        // Manos
+        const handGeo = new THREE.SphereGeometry(0.08, 16, 16);
+        const handMat = new THREE.MeshPhongMaterial({ color: 0xffcc99 });
+
+        const leftHand = new THREE.Mesh(handGeo, handMat);
+        leftHand.position.set(-0.6, 0.7, 0);
+        leftHand.name = 'leftHand';
+        group.add(leftHand);
+
+        const rightHand = new THREE.Mesh(handGeo, handMat);
+        rightHand.position.set(0.6, 0.7, 0);
+        rightHand.name = 'rightHand';
+        group.add(rightHand);
+
+        group.name = 'avatar';
+        avatarScene.add(group);
+    }
+
+    async function animateAvatarSign() {
+        const input = document.getElementById('avatarTextInput');
+        const word = input.value.trim();
+        if (!word) return;
+
+        showToast('🤖', `Animando: "${word}"...`);
+
+        // Intentar obtener animación del servidor
+        const animData = await API.getSignAnimation(word);
+
+        if (animData && animData.animation) {
+            // Usar datos de animación del servidor
+            playAvatarAnimation(animData.animation);
+        } else {
+            // Animación básica local
+            playBasicAnimation(word);
+        }
+    }
+
+    function playBasicAnimation(word) {
+        const avatar = avatarScene.getObjectByName('avatar');
+        if (!avatar) return;
+
+        const leftHand = avatar.getObjectByName('leftHand');
+        const rightHand = avatar.getObjectByName('rightHand');
+        const leftArm = avatar.getObjectByName('leftArm');
+        const rightArm = avatar.getObjectByName('rightArm');
+
+        // Animación simple: mover manos arriba
+        const speed = parseFloat(document.getElementById('avatarSpeed').value);
+        const duration = 1000 / speed;
+
+        // Ejemplo: "hola" = mano derecha sube y se mueve
+        if (word.toLowerCase() === 'hola') {
+            animateProperty(rightHand.position, 'y', 0.7, 1.6, duration);
+            animateProperty(rightHand.position, 'x', 0.6, 0.8, duration);
+            setTimeout(() => {
+                animateProperty(rightHand.position, 'x', 0.8, 0.4, duration/2);
+                setTimeout(() => {
+                    animateProperty(rightHand.position, 'x', 0.4, 0.8, duration/2);
+                    setTimeout(() => {
+                        animateProperty(rightHand.position, 'y', 1.6, 0.7, duration);
+                        animateProperty(rightHand.position, 'x', 0.8, 0.6, duration);
+                    }, duration / 2);
+                }, duration / 2);
+            }, duration);
+        } else {
+            // Animación genérica
+            animateProperty(rightHand.position, 'y', 0.7, 1.3, duration);
+            animateProperty(leftHand.position, 'y', 0.7, 1.3, duration);
+            setTimeout(() => {
+                animateProperty(rightHand.position, 'y', 1.3, 0.7, duration);
+                animateProperty(leftHand.position, 'y', 1.3, 0.7, duration);
+            }, duration);
+        }
+
+        showToast('✅', `Seña "${word}" animada`);
+    }
+
+    function animateProperty(obj, prop, from, to, duration) {
+        const start = performance.now();
+        function update(now) {
+            const elapsed = now - start;
+            const progress = Math.min(elapsed / duration, 1);
+            const eased = 0.5 - Math.cos(progress * Math.PI) / 2; // ease in-out
+            obj[prop] = from + (to - from) * eased;
+            if (progress < 1) requestAnimationFrame(update);
+        }
+        requestAnimationFrame(update);
+    }
+
+    function quickSign(word) {
+        document.getElementById('avatarTextInput').value = word;
+        animateAvatarSign();
+    }
+
+    function playAvatarAnimation(animData) {
+        // Implementar reproducción de animación completa del servidor
+        showToast('🤖', 'Reproduciendo animación del servidor...');
+    }
+
+    // ============================================
+    // TRANSCRIPCIÓN VOZ → TEXTO
+    // ============================================
+    function toggleTranscription() {
+        const btn = document.getElementById('btnRecord');
+
+        if (APP.isRecording) {
+            stopTranscription();
+        } else {
+            startTranscription();
+        }
+    }
+
+    function startTranscription() {
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+        if (!SpeechRecognition) {
+            showToast('❌', 'Tu navegador no soporta reconocimiento de voz', 'danger');
+            return;
+        }
+
+        APP.recognition = new SpeechRecognition();
+        APP.recognition.lang = 'es-ES';
+        APP.recognition.continuous = true;
+        APP.recognition.interimResults = true;
+
+        const display = document.getElementById('transcriptionDisplay');
+        let finalTranscript = '';
+
+        APP.recognition.onstart = () => {
+            APP.isRecording = true;
+            document.getElementById('btnRecord').classList.add('recording');
+            display.innerHTML = '<p class="live-text">🎤 Escuchando...</p>';
+            showToast('🎤', 'Transcripción iniciada');
+        };
+
+        APP.recognition.onresult = (event) => {
+            let interimTranscript = '';
+
+            for (let i = event.resultIndex; i < event.results.length; i++) {
+                const transcript = event.results[i][0].transcript;
+                if (event.results[i].isFinal) {
+                    finalTranscript += transcript + ' ';
+                    showVisualNotification('success');
+                    vibrate();
+                } else {
+                    interimTranscript += transcript;
+                }
+            }
+
+            display.innerHTML = `
+                <p class="live-text">${finalTranscript}</p>
+                <p class="interim-text">${interimTranscript}</p>
+            `;
+        };
+
+        APP.recognition.onerror = (event) => {
+            console.error('Speech error:', event.error);
+            if (event.error !== 'no-speech') {
+                showToast('⚠️', `Error: ${event.error}`, 'danger');
+            }
+        };
+
+        APP.recognition.onend = () => {
+            if (APP.isRecording) {
+                // Reiniciar si aún debe estar grabando
+                APP.recognition.start();
+            }
+        };
+
+        APP.recognition.start();
+    }
+
+    function stopTranscription() {
+        if (APP.recognition) {
+            APP.isRecording = false;
+            APP.recognition.stop();
+            document.getElementById('btnRecord').classList.remove('recording');
+            showToast('⏹️', 'Transcripción detenida');
+        }
+    }
+
+    function clearTranscription() {
+        document.getElementById('transcriptionDisplay').innerHTML =
+            '<p style="color: var(--text-muted); text-align: center; margin-top: 50px;">' +
+            'Presiona el botón del micrófono para comenzar... 🎙️</p>';
+    }
+
+    function copyTranscription() {
+        const text = document.getElementById('transcriptionDisplay').innerText;
+        navigator.clipboard.writeText(text).then(() => {
+            showToast('📋', 'Texto copiado al portapapeles');
+        });
+    }
+
+    // ============================================
+    // DICCIONARIO
+    // ============================================
+    async function loadDictionary(search = '') {
+        const data = await API.getDictionary(search);
+        const grid = document.getElementById('dictionaryGrid');
+
+        if (data && data.signs) {
+            grid.innerHTML = data.signs.map(sign => `
+                <div class="dict-card" onclick="showSignDetail('${sign.word}')">
+                    <div class="sign-emoji">${sign.emoji}</div>
+                    <div class="sign-word">${sign.word}</div>
+                    <div class="sign-category">${sign.category}</div>
+                </div>
+            `).join('');
+        }
+    }
+
+    function searchDictionary(query) {
+        clearTimeout(window._dictSearchTimeout);
+        window._dictSearchTimeout = setTimeout(() => loadDictionary(query), 300);
+    }
+
+    function showSignDetail(word) {
+        showToast('📖', `Mostrando detalle de "${word}"...`);
+        // Implementar modal con video/animación de la seña
+    }
+
+    // ============================================
+    // LECCIONES
+    // ============================================
+    function startLesson(lessonId) {
+        showToast('🎓', `Iniciando lección: ${lessonId}`);
+        // Implementar sistema de lecciones
+    }
+
+    // ============================================
+    // ACCESIBILIDAD
+    // ============================================
+    function changeFontSize(delta) {
+        APP.fontSize += (delta * 2);
+        APP.fontSize = Math.max(14, Math.min(32, APP.fontSize));
+        document.documentElement.style.fontSize = APP.fontSize + 'px';
+        localStorage.setItem('fontSize', APP.fontSize);
+
+        document.querySelectorAll('.message').forEach(msg => {
+            msg.style.fontSize = APP.fontSize + 'px';
+        });
+    }
+
+    function toggleTheme(theme) {
+        document.documentElement.dataset.theme = theme;
+        localStorage.setItem('theme', theme);
+    }
+
+    // ============================================
+    // NOTIFICACIONES
+    // ============================================
+    function showVisualNotification(type = 'info') {
+        if (!document.getElementById('flashNotifications')?.checked) return;
+
+        const flash = document.createElement('div');
+        flash.className = `visual-notification ${type}`;
+        document.body.appendChild(flash);
+        setTimeout(() => flash.remove(), 400);
+    }
+
+    function vibrate(duration = 100) {
+        if (document.getElementById('vibrationNotifications')?.checked &&
+            navigator.vibrate) {
+            navigator.vibrate(duration);
+        }
+    }
+
+    function showToast(icon, message, type = 'info') {
+        const container = document.getElementById('toastContainer');
+        const toast = document.createElement('div');
+        toast.className = 'toast';
+
+        if (type === 'danger') {
+            toast.style.borderLeftColor = 'var(--danger)';
+        } else if (type === 'success') {
+            toast.style.borderLeftColor = 'var(--success)';
+        }
+
+        toast.innerHTML = `
+            <span style="font-size: 1.3rem;">${icon}</span>
+            <span>${message}</span>
+        `;
+
+        container.appendChild(toast);
+        setTimeout(() => {
+            toast.style.opacity = '0';
+            toast.style.transform = 'translateX(100%)';
+            setTimeout(() => toast.remove(), 300);
+        }, 3000);
+    }
+
+    // ============================================
+    // CONFIGURACIÓN
+    // ============================================
+    function changeSignLanguage(lang) {
+        APP.signLanguage = lang;
+        localStorage.setItem('signLanguage', lang);
+        showToast('🌍', `Lengua de señas: ${lang}`);
+
+        if (APP.isCameraActive) {
+            document.getElementById('cameraStatusText').textContent =
+                `Reconociendo ${lang}...`;
+        }
+    }
+
+    function openSettings() {
+        document.getElementById('settingsModal').classList.add('active');
+        document.getElementById('serverUrl').value = APP.serverUrl;
+    }
+
+    function closeSettings() {
+        document.getElementById('settingsModal').classList.remove('active');
+    }
+
+    function saveSettings() {
+        APP.serverUrl = document.getElementById('serverUrl').value;
+        localStorage.setItem('serverUrl', APP.serverUrl);
+        closeSettings();
+        showToast('✅', 'Configuración guardada');
+        checkServerConnection();
+    }
+
+    // ============================================
+    // CONEXIÓN CON SERVIDOR
+    // ============================================
+    async function checkServerConnection() {
+        const dot = document.getElementById('connectionDot');
+        const text = document.getElementById('connectionText');
+
+        const isConnected = await API.checkConnection();
+
+        if (isConnected) {
+            dot.className = 'dot connected';
+            text.textContent = 'Conectado';
+        } else {
+            dot.className = 'dot disconnected';
+            text.textContent = 'Sin servidor';
+        }
+    }
+
+    // ============================================
+    // INICIALIZACIÓN
+    // ============================================
+    document.addEventListener('DOMContentLoaded', () => {
+        // Cargar tema guardado
+        const savedTheme = localStorage.getItem('theme') || 'dark';
+        document.documentElement.dataset.theme = savedTheme;
+
+        // Cargar idioma guardado
+        const savedLang = localStorage.getItem('signLanguage') || 'LSC';
+        document.getElementById('signLanguage').value = savedLang;
+        APP.signLanguage = savedLang;
+
+        // Cargar tamaño de fuente
+        document.documentElement.style.fontSize = APP.fontSize + 'px';
+
+        // Verificar conexión
+        checkServerConnection();
+        setInterval(checkServerConnection, 30000); // Cada 30s
+
+        console.log('🤟 SignAI inicializado correctamente');
+        console.log(`📡 Servidor: ${APP.serverUrl}`);
+        console.log(`🌍 Lengua de señas: ${APP.signLanguage}`);
+    });
+    </script>
+
+</body>
+</html>

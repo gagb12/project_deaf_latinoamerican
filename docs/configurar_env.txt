@@ -1,0 +1,4 @@
+SECRET_KEY=tu-clave-secreta-muy-segura
+FLASK_ENV=development
+FLASK_DEBUG=1
+CORS_ORIGINS=http://localhost:3000

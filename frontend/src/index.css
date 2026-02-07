@@ -1,0 +1,21 @@
+/* Importar todos los estilos */
+@import url('./styles/globals.css');
+@import url('./styles/App.css');
+@import url('./styles/Camera.css');
+@import url('./styles/Subtitles.css');
+@import url('./styles/LanguageSelector.css');
+
+/* Estilos adicionales del body */
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
+}

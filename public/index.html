@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#2196F3" />
+  
+  <!-- SEO Meta Tags -->
+  <meta name="description" content="Traductor en tiempo real de Lengua de Señas Colombiana (LSC) y American Sign Language (ASL) a texto usando inteligencia artificial" />
+  <meta name="keywords" content="lengua de señas, LSC, ASL, traductor, inteligencia artificial, accesibilidad, sordera" />
+  <meta name="author" content="Tu Nombre" />
+  
+  <!-- Open Graph Meta Tags (Redes Sociales) -->
+  <meta property="og:title" content="Traductor de Lengua de Señas - LSC y ASL" />
+  <meta property="og:description" content="Aplicación web para traducir lengua de señas a texto en tiempo real" />
+  <meta property="og:image" content="%PUBLIC_URL%/logo512.png" />
+  <meta property="og:url" content="https://tudominio.com" />
+  <meta property="og:type" content="website" />
+  
+  <!-- Twitter Card Meta Tags -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Traductor de Lengua de Señas" />
+  <meta name="twitter:description" content="Traducción en tiempo real de LSC y ASL a texto" />
+  <meta name="twitter:image" content="%PUBLIC_URL%/logo512.png" />
+  
+  <!-- Apple Touch Icon -->
+  <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
+  
+  <!-- Manifest para PWA -->
+  <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
+  
+  <!-- Preconnect para mejor rendimiento -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  
+  <!-- Google Fonts (Opcional) -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- Font Awesome para iconos -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  
+  <title>Traductor de Lengua de Señas - LSC y ASL</title>
+  
+  <!-- Estilos inline críticos para carga rápida -->
+  <style>
+    /* Loading Screen */
+    #loading-screen {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+      transition: opacity 0.5s ease-out;
+    }
+    
+    #loading-screen.hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
+    
+    .loader {
+      width: 60px;
+      height: 60px;
+      border: 6px solid rgba(255, 255, 255, 0.3);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    
+    .loading-text {
+      color: white;
+      font-size: 1.2rem;
+      margin-top: 20px;
+      font-family: 'Inter', sans-serif;
+      font-weight: 600;
+    }
+    
+    .loading-logo {
+      font-size: 4rem;
+      margin-bottom: 20px;
+      animation: pulse 2s ease-in-out infinite;
+    }
+    
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+    }
+    
+    /* Evitar flash de contenido sin estilo */
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+    }
+    
+    #root {
+      min-height: 100vh;
+    }
+    
+    /* No Script fallback */
+    .noscript-message {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      background: #f44336;
+      color: white;
+      padding: 20px;
+      text-align: center;
+      font-weight: bold;
+      z-index: 10000;
+    }
+  </style>
+</head>
+<body>
+  <!-- Mensaje para navegadores sin JavaScript -->
+  <noscript>
+    <div class="noscript-message">
+      ⚠️ Necesitas habilitar JavaScript para usar esta aplicación.
+      <br>
+      You need to enable JavaScript to run this app.
+    </div>
+  </noscript>
+  
+  <!-- Pantalla de carga -->
+  <div id="loading-screen">
+    <div class="loading-logo">🤟</div>
+    <div class="loader"></div>
+    <div class="loading-text">Cargando Traductor de Señas...</div>
+  </div>
+  
+  <!-- Contenedor principal de React -->
+  <div id="root"></div>
+  
+  <!-- Script para ocultar pantalla de carga -->
+  <script>
+    window.addEventListener('load', function() {
+      setTimeout(function() {
+        const loadingScreen = document.getElementById('loading-screen');
+        if (loadingScreen) {
+          loadingScreen.classList.add('hidden');
+          setTimeout(() => loadingScreen.remove(), 500);
+        }
+      }, 1000);
+    });
+  </script>
+  
+  <!-- 
+    Este HTML se cargará antes que React.
+    El bundle de JavaScript se inyectará automáticamente aquí.
+  -->
+</body>
+</html>

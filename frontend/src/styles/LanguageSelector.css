@@ -1,0 +1,228 @@
+/* ============================================
+   SELECTOR DE IDIOMA
+   ============================================ */
+
+.language-selector {
+  background: white;
+  padding: var(--spacing-xl);
+  border-radius: var(--border-radius-xl);
+  box-shadow: var(--shadow-lg);
+  animation: fadeIn 0.6s ease-out;
+}
+
+.language-selector label {
+  display: block;
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: var(--spacing-lg);
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* ========== BOTONES DE IDIOMA ========== */
+.language-buttons {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: var(--spacing-md);
+}
+
+.language-buttons button {
+  background: linear-gradient(135deg, #f5f5f5 0%, #e0e0e0 100%);
+  color: var(--text-primary);
+  padding: var(--spacing-lg) var(--spacing-xl);
+  font-size: 1.1rem;
+  font-weight: 600;
+  border: 3px solid transparent;
+  border-radius: var(--border-radius-lg);
+  cursor: pointer;
+  transition: all var(--transition-normal);
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-sm);
+}
+
+.language-buttons button::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  background: rgba(33, 150, 243, 0.1);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  transition: width 0.6s, height 0.6s;
+}
+
+.language-buttons button:hover::before {
+  width: 300px;
+  height: 300px;
+}
+
+.language-buttons button:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+  border-color: var(--primary-light);
+}
+
+.language-buttons button.active {
+  background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+  color: white;
+  border-color: var(--primary-dark);
+  box-shadow: 0 8px 20px rgba(33, 150, 243, 0.4);
+  transform: translateY(-2px);
+}
+
+.language-buttons button.active::after {
+  content: '✓';
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: white;
+  color: var(--primary-color);
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+/* ========== ICONOS DE BANDERAS ========== */
+.flag-icon {
+  font-size: 1.8rem;
+  filter: drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.2));
+}
+
+/* ========== INFORMACIÓN DEL IDIOMA ========== */
+.language-info {
+  margin-top: var(--spacing-lg);
+  padding: var(--spacing-md);
+  background: var(--bg-secondary);
+  border-radius: var(--border-radius-md);
+  border-left: 4px solid var(--primary-color);
+}
+
+.language-info-title {
+  font-weight: 700;
+  color: var(--primary-color);
+  margin-bottom: var(--spacing-sm);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+.language-info-description {
+  color: var(--text-secondary);
+  line-height: 1.6;
+  font-size: 0.95rem;
+}
+
+/* ========== LISTA DE CARACTERÍSTICAS ========== */
+.language-features {
+  margin-top: var(--spacing-md);
+  padding-left: var(--spacing-lg);
+}
+
+.language-features li {
+  color: var(--text-secondary);
+  margin-bottom: var(--spacing-xs);
+  position: relative;
+}
+
+.language-features li::before {
+  content: '✓';
+  position: absolute;
+  left: -20px;
+  color: var(--success-color);
+  font-weight: 700;
+}
+
+/* ========== SELECTOR DROPDOWN (ALTERNATIVO) ========== */
+.language-dropdown {
+  position: relative;
+  width: 100%;
+}
+
+.language-dropdown select {
+  width: 100%;
+  padding: var(--spacing-md) var(--spacing-lg);
+  font-size: 1.1rem;
+  font-weight: 600;
+  border: 2px solid #ddd;
+  border-radius: var(--border-radius-md);
+  background: white;
+  cursor: pointer;
+  transition: all var(--transition-normal);
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23333' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 15px center;
+  padding-right: 40px;
+}
+
+.language-dropdown select:hover {
+  border-color: var(--primary-color);
+}
+
+.language-dropdown select:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.1);
+}
+
+/* ========== INDICADOR DE IDIOMA ACTIVO ========== */
+.current-language-display {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-md);
+  padding: var(--spacing-md);
+  background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+  color: white;
+  border-radius: var(--border-radius-md);
+  margin-bottom: var(--spacing-lg);
+  font-weight: 700;
+}
+
+.current-language-display .flag-icon {
+  font-size: 2rem;
+}
+
+/* ========== RESPONSIVE ========== */
+@media (max-width: 768px) {
+  .language-buttons {
+    grid-template-columns: 1fr;
+  }
+
+  .language-buttons button {
+    padding: var(--spacing-md) var(--spacing-lg);
+    font-size: 1rem;
+  }
+
+  .flag-icon {
+    font-size: 1.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .language-selector {
+    padding: var(--spacing-lg);
+  }
+
+  .language-selector label {
+    font-size: 1rem;
+  }
+
+  .language-buttons button {
+    padding: var(--spacing-sm) var(--spacing-md);
+    font-size: 0.95rem;
+  }
+}

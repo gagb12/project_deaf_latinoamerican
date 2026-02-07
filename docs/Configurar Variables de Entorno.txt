@@ -1,0 +1,5 @@
+# Copiar archivo de ejemplo
+cp .env.example .env
+
+# Editar .env con tus configuraciones
+nano .env
