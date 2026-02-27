@@ -1,6 +1,15 @@
-venv/
+# Python .gitignore
 __pycache__/
-*.pyc
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+ENV/
+env.bak/
+# Node.js .gitignore
+node_modules/
+npm-debug.log
+package-lock.json
 .DS_Store
-.env
-
