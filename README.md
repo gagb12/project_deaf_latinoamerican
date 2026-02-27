@@ -1,72 +1,36 @@
-# 🤟 Traductor de Lengua de Señas LSC/ASL
+# Project Title
 
-Aplicación web para traducción en tiempo real de Lengua de Señas Colombiana (LSC) y American Sign Language (ASL) a texto.
+## Introduction
+This project aims to provide a platform for the Deaf Latino American community, offering resources and information tailored to their needs.
 
-## 🚀 Características
+## Features
+- Multilingual support
+- Accessibility features
+- Community engagement tools
 
-- ✅ Detección en tiempo real con cámara web
-- ✅ Soporte para LSC y ASL
-- ✅ Subtítulos con nivel de confianza
-- ✅ Interfaz web responsive
-- ✅ WebSocket para comunicación en tiempo real
+## Installation
+Follow these steps to install the project:
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/gagb12/project_deaf_latinoamerican.git
+   ```
+2. Navigate into the project directory:
+   ```bash
+   cd project_deaf_latinoamerican
+   ```
+3. Install the required dependencies:
+   ```bash
+   npm install
+   ```
 
-## 📋 Requisitos
-
-- Python 3.8+
-- Node.js 16+
-- Webcam
-
-## 🛠️ Instalación
-
-### Backend
+## Usage
+To start the application, run:
 ```bash
-cd backend
-pip install -r requirements.txt
-python server.py
-----------------------------------------
-Frontend
-
-cd frontend
-npm install
 npm start
-----------------------------------------
+```
 
-📖 Uso
-Abre http://localhost:3000
-Selecciona el idioma (LSC o ASL)
-Permite acceso a la cámara
-Realiza señas frente a la cámara
-Ve los subtítulos en tiempo real
-------------------------------------------
+## Contributing
+Contributions are welcome! Please read the [CONTRIBUTING.md](CONTRIBUTING.md) for details.
 
-🤝 Contribuir
-Las contribuciones son bienvenidas. Por favor:
-
-Fork el proyecto
-Crea una rama para tu feature
-Commit tus cambios
-Push a la rama
-Abre un Pull Request
----------------------------------------------------
-🚀 Comandos de Uso
-Bash
-
-# Iniciar con Docker Compose
-docker-compose up -d
-
-# Ver logs
-docker-compose logs -f
-
-# Detener servicios
-docker-compose down
-
-# Rebuild
-docker-compose up --build
-
-# Solo backend
-docker-compose up backend
-
-# Solo frontend
-docker-compose up frontend
----------------------------------------------------------------
-
+## License
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
